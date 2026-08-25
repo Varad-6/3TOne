@@ -1,0 +1,1160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===================================================
+   COLOR PALETTE
+=================================================== */
+:root {
+  --primary-blue: #070959;
+  --light-blue: #f0f4ff;
+  --dark-blue: #0a0d6f;
+  --border-gray: #e5e7eb;
+  --text-dark: #1a1a1a;
+  --text-light: #ffffff;
+  --text-muted: #6b7280;
+  --bg-light: #ffffff;
+  --bg-gray: #f9fafb;
+}
+
+/* ===================================================
+   BASE SETUP
+=================================================== */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ===================================================
+   TYPOGRAPHY - ALL BLUE
+=================================================== */
+h1 {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--primary-blue);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-blue);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+h6 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+p {
+  font-size: 14px;
+  color: var(--text-dark);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark);
+  display: block;
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+a {
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ===================================================
+   SIDEBAR - YOUR CUSTOM LAYOUT
+=================================================== */
+aside {
+  background-color: var(--bg-light);
+  border-right: 1px solid var(--border-gray);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+aside h1 {
+  color: var(--primary-blue);
+  font-size: 22px;
+}
+
+aside p {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Sidebar Navigation Links */
+aside nav a {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin: 4px 0;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  padding-left: 16px;
+  color: var(--text-dark);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+/* Sidebar Link - Hover */
+aside nav a:hover {
+  background-color: #f3f4f6;
+  color: var(--text-dark);
+  text-decoration: none;
+}
+
+/* Sidebar Link - Active (Your bg-primary class) */
+aside nav a.bg-primary {
+  background-color: var(--primary-blue);
+  color: var(--text-light);
+  border-left-color: var(--primary-blue);
+  font-weight: 600;
+}
+
+aside nav a.bg-primary:hover {
+  background-color: var(--dark-blue);
+  border-left-color: var(--dark-blue);
+}
+
+/* Sidebar User Section */
+aside button {
+  transition: all 0.2s ease;
+}
+
+aside button:hover {
+  background-color: #f9fafb;
+}
+
+/* Sidebar Dropdown Menu */
+aside .absolute.bottom-full {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+aside .absolute.bottom-full button {
+  color: var(--text-dark);
+  text-align: left;
+  width: 100%;
+}
+
+aside .absolute.bottom-full button:hover {
+  background-color: #f3f4f6;
+}
+
+aside .absolute.bottom-full button[class*="text-red"],
+aside .absolute.bottom-full .text-red-600 {
+  color: #dc2626;
+}
+
+aside .absolute.bottom-full button[class*="text-red"]:hover,
+aside .absolute.bottom-full .text-red-600:hover {
+  background-color: #fee2e2;
+}
+
+/* ===================================================
+   HEADER / TOP BAR
+=================================================== */
+header {
+  background-color: var(--bg-light);
+  border-bottom: 1px solid var(--border-gray);
+  z-index: 30;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+header h2 {
+  color: var(--text-dark);
+  font-size: 18px;
+}
+
+/* ===================================================
+   CARDS - RADIX UI & CUSTOM
+=================================================== */
+.card,
+[class*="Card"] {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  overflow: hidden;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Card Header */
+[class*="CardHeader"],
+.card-header {
+  background-color: var(--bg-gray);
+  border-bottom: 1px solid var(--border-gray);
+  border-radius: 8px 8px 0 0;
+  padding: 24px;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Card Title */
+[class*="CardTitle"],
+.card-title {
+  color: var(--primary-blue);
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0;
+}
+
+/* Card Content */
+[class*="CardContent"],
+.card-content {
+  padding: 24px;
+  color: var(--text-dark);
+}
+
+/* Card Description */
+[class*="CardDescription"],
+.card-description {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 8px 0 0 0;
+}
+
+/* Card Footer */
+[class*="CardFooter"],
+.card-footer {
+  padding: 24px;
+  border-top: 1px solid var(--border-gray);
+  background-color: var(--bg-gray);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* ===================================================
+   TABS
+=================================================== */
+[class*="TabsList"],
+.tabs-list {
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  padding: 4px;
+  display: inline-flex;
+  gap: 4px;
+  transition: background-color 0.3s ease;
+}
+
+[class*="TabsTrigger"],
+.tabs-trigger {
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+[class*="TabsTrigger"]:hover,
+.tabs-trigger:hover {
+  color: var(--text-dark);
+}
+
+[class*="TabsTrigger"][data-state="active"],
+.tabs-trigger.active {
+  background-color: var(--bg-light);
+  color: var(--primary-blue);
+  border: 2px solid var(--border-gray);
+  font-weight: 600;
+}
+
+/* ===================================================
+   BUTTONS - ALL TYPES WITH BACKGROUNDS
+=================================================== */
+button {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Primary Button */
+button[class*="bg-primary"],
+.btn-primary,
+[class*="Button"][class*="primary"] {
+  background-color: var(--primary-blue);
+  color: var(--text-light);
+  border: 1px solid var(--primary-blue);
+  border-radius: 6px;
+  padding: 8px 16px;
+}
+
+button[class*="bg-primary"]:hover,
+.btn-primary:hover,
+[class*="Button"][class*="primary"]:hover {
+  background-color: var(--dark-blue);
+  border-color: var(--dark-blue);
+}
+
+button[class*="bg-primary"]:active,
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+/* Secondary Button */
+.btn-secondary,
+[class*="Button"][class*="secondary"] {
+  background-color: var(--light-blue);
+  color: var(--primary-blue);
+  border: 1px solid var(--primary-blue);
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 8px 16px;
+}
+
+.btn-secondary:hover,
+[class*="Button"][class*="secondary"]:hover {
+  background-color: #e0e7ff;
+}
+
+/* Outline Button */
+.btn-outline,
+[class*="Button"][class*="outline"] {
+  background-color: var(--bg-light);
+  color: var(--primary-blue);
+  border: 2px solid var(--primary-blue);
+  border-radius: 6px;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover,
+[class*="Button"][class*="outline"]:hover {
+  background-color: var(--light-blue);
+}
+
+/* Ghost Button */
+.btn-ghost,
+button[variant="ghost"],
+[class*="Button"][class*="ghost"] {
+  background-color: transparent;
+  color: var(--text-dark);
+  border: 1px solid transparent;
+  padding: 8px 16px;
+}
+
+.btn-ghost:hover,
+button[variant="ghost"]:hover,
+[class*="Button"][class*="ghost"]:hover {
+  background-color: var(--bg-gray);
+}
+
+/* Destructive Button */
+.btn-destructive,
+button[class*="destructive"],
+[class*="Button"][class*="destructive"] {
+  background-color: #dc2626;
+  color: white;
+  border: 1px solid #dc2626;
+}
+
+.btn-destructive:hover,
+button[class*="destructive"]:hover,
+[class*="Button"][class*="destructive"]:hover {
+  background-color: #b91c1c;
+}
+
+/* ===================================================
+   FORM INPUTS
+=================================================== */
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-gray);
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  transition: all 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(7, 9, 89, 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background-color: var(--bg-gray);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===================================================
+   TABLES
+=================================================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-light);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+
+thead {
+  background-color: var(--bg-gray);
+  transition: background-color 0.3s ease;
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--primary-blue);
+  border-bottom: 1px solid var(--border-gray);
+}
+
+td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-dark);
+  border-bottom: 1px solid var(--border-gray);
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: var(--bg-gray);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===================================================
+   DIALOGS & MODALS
+=================================================== */
+[data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+[data-radix-dialog-content] {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Dialog Header */
+[data-radix-dialog-content] > div:first-child,
+[class*="DialogHeader"] {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid var(--border-gray);
+}
+
+/* Dialog Title */
+[data-radix-dialog-content] [class*="DialogTitle"],
+[data-radix-dialog-content] h2,
+[data-radix-dialog-content] [role="heading"] {
+  color: var(--primary-blue);
+  font-weight: 600;
+  font-size: 20px;
+  margin: 0;
+}
+
+/* Dialog Description */
+[data-radix-dialog-content] [class*="DialogDescription"],
+[data-radix-dialog-content] p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 8px 0 0 0;
+}
+
+/* Dialog Content Body */
+[data-radix-dialog-content] > div:nth-child(2) {
+  padding: 24px;
+  background-color: var(--bg-light);
+}
+
+/* Dialog Footer - Buttons Area */
+[data-radix-dialog-content] > div:last-child,
+[class*="DialogFooter"] {
+  padding: 16px 24px 24px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background-color: var(--bg-light);
+}
+
+/* Dialog Inputs */
+[data-radix-dialog-content] input,
+[data-radix-dialog-content] textarea,
+[data-radix-dialog-content] select {
+  background-color: var(--bg-light) !important;
+  color: var(--text-dark) !important;
+  border-color: var(--border-gray) !important;
+  width: 100%;
+  margin: 8px 0;
+}
+
+[data-radix-dialog-content] input:focus,
+[data-radix-dialog-content] textarea:focus,
+[data-radix-dialog-content] select:focus {
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 0 0 3px rgba(7, 9, 89, 0.1) !important;
+}
+
+/* ===================================================
+   RADIX UI UTILITIES
+=================================================== */
+.text-muted-foreground,
+[class*="muted"],
+.muted-foreground {
+  color: var(--text-muted);
+}
+
+.bg-muted,
+.bg-background {
+  background-color: var(--bg-light);
+}
+
+.text-sm {
+  font-size: 14px;
+}
+
+.text-xs {
+  font-size: 12px;
+}
+
+.text-base {
+  font-size: 16px;
+}
+
+.text-lg {
+  font-size: 18px;
+}
+
+.text-2xl {
+  font-size: 24px;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* ===================================================
+   BADGES & STATUS
+=================================================== */
+.badge,
+[class*="badge"],
+[class*="Badge"] {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+.badge-planned,
+[class*="badge-planned"] {
+  background-color: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.badge-in-progress,
+[class*="badge-in-progress"] {
+  background-color: var(--light-blue);
+  color: var(--primary-blue);
+  border-color: #bfdbfe;
+}
+
+.badge-completed,
+[class*="badge-completed"] {
+  background-color: #d1fae5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.badge-on-hold,
+[class*="badge-on-hold"] {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+/* Status badges in lists */
+span[class*="bg-yellow"],
+span[class*="bg-green"],
+span[class*="bg-gray"] {
+  border-radius: 9999px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* ===================================================
+   ANIMATIONS
+=================================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* ===================================================
+   ACCESSIBILITY
+=================================================== */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+/* ===================================================
+   POPPER / SELECT CONTENT (Light Mode)
+=================================================== */
+[data-radix-popper-content-wrapper],
+[data-radix-select-content],
+.SelectContent,
+[data-radix-dropdown-menu-content],
+[class*="DropdownMenuContent"],
+[class*="DropdownMenuSubContent"] {
+  background-color: var(--bg-light) !important;
+  color: inherit !important;
+  border: 1px solid var(--border-gray) !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.08),
+    0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  z-index: 9999 !important;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+[data-radix-select-content] [data-radix-select-viewport],
+.SelectViewport,
+[class*="SelectViewport"] {
+  background-color: var(--bg-light) !important;
+  color: inherit !important;
+  backdrop-filter: none !important;
+}
+
+[data-radix-select-content] [data-radix-select-viewport] * {
+  background: transparent;
+}
+
+.SelectContent,
+.SelectViewport {
+  background-color: var(--bg-light) !important;
+}
+
+/* ===================================================
+   DARK MODE SUPPORT
+=================================================== */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #1a1a1a;
+  color: #f0f4ff;
+}
+
+/* Dark Mode Typography */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: #f0f4ff;
+}
+
+.dark p,
+.dark label {
+  color: #e5e7eb;
+}
+
+.dark a {
+  color: #93c5fd;
+}
+
+.dark a:hover {
+  color: #bfdbfe;
+}
+
+/* Dark Mode Inputs */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #2d2d2d;
+  color: #f0f4ff;
+  border-color: #404040;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #3b4bff;
+  box-shadow: 0 0 0 3px rgba(59, 75, 255, 0.2);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af;
+}
+
+.dark input:disabled,
+.dark textarea:disabled,
+.dark select:disabled {
+  background-color: #1f1f1f;
+}
+
+/* Dark Mode Dialogs */
+.dark [data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.dark [data-radix-dialog-content] {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #f0f4ff;
+}
+
+.dark [data-radix-dialog-content] [class*="DialogTitle"],
+.dark [data-radix-dialog-content] h2,
+.dark [data-radix-dialog-content] [role="heading"] {
+  color: #f0f4ff;
+}
+
+.dark [data-radix-dialog-content] [class*="DialogDescription"],
+.dark [data-radix-dialog-content] p {
+  color: #9ca3af;
+}
+
+.dark [data-radix-dialog-content] input,
+.dark [data-radix-dialog-content] textarea,
+.dark [data-radix-dialog-content] select {
+  background-color: #2d2d2d !important;
+  color: #f0f4ff !important;
+  border-color: #404040 !important;
+}
+
+.dark [data-radix-dialog-content] input:focus,
+.dark [data-radix-dialog-content] textarea:focus,
+.dark [data-radix-dialog-content] select:focus {
+  border-color: #3b4bff !important;
+  box-shadow: 0 0 0 3px rgba(59, 75, 255, 0.2) !important;
+}
+
+/* Dark Mode Sidebar */
+.dark aside {
+  background-color: #1a1a1a;
+  border-color: #404040;
+}
+
+.dark aside h1 {
+  color: #f0f4ff;
+}
+
+.dark aside p {
+  color: #9ca3af;
+}
+
+.dark aside nav a {
+  color: #e5e7eb;
+}
+
+.dark aside nav a:hover:not(.bg-primary) {
+  background-color: #2d2d2d;
+}
+
+.dark aside nav a.bg-primary {
+  background-color: #3b4bff;
+  color: #ffffff;
+  border-left-color: #3b4bff;
+}
+
+.dark aside nav a.bg-primary:hover {
+  background-color: #2d3bdd;
+  border-left-color: #2d3bdd;
+}
+
+.dark aside button:hover {
+  background-color: #2d2d2d;
+}
+
+.dark aside .absolute.bottom-full {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+.dark aside .absolute.bottom-full button {
+  color: #e5e7eb;
+}
+
+.dark aside .absolute.bottom-full button:hover {
+  background-color: #1f1f1f;
+}
+
+.dark aside .absolute.bottom-full button[class*="text-red"]:hover,
+.dark aside .absolute.bottom-full .text-red-600:hover {
+  background-color: #7f1d1d;
+}
+
+/* Dark Mode Header */
+.dark header {
+  background-color: #1a1a1a;
+  border-color: #404040;
+}
+
+.dark header h2 {
+  color: #f0f4ff;
+}
+
+/* Dark Mode Cards */
+.dark [class*="Card"],
+.dark .card {
+  background-color: #2d2d2d;
+  border-color: #404040;
+}
+
+.dark [class*="CardHeader"],
+.dark .card-header {
+  background-color: #1f1f1f;
+  border-color: #404040;
+}
+
+.dark [class*="CardTitle"],
+.dark .card-title {
+  color: #f0f4ff;
+}
+
+.dark [class*="CardContent"],
+.dark .card-content {
+  color: #e5e7eb;
+}
+
+.dark [class*="CardDescription"],
+.dark .card-description {
+  color: #9ca3af;
+}
+
+.dark [class*="CardFooter"],
+.dark .card-footer {
+  background-color: #1f1f1f;
+  border-color: #404040;
+}
+
+/* Dark Mode Tabs */
+.dark [class*="TabsList"],
+.dark .tabs-list {
+  background-color: #1f1f1f;
+}
+
+.dark [class*="TabsTrigger"],
+.dark .tabs-trigger {
+  color: #9ca3af;
+}
+
+.dark [class*="TabsTrigger"]:hover,
+.dark .tabs-trigger:hover {
+  color: #e5e7eb;
+}
+
+.dark [class*="TabsTrigger"][data-state="active"],
+.dark .tabs-trigger.active {
+  background-color: #2d2d2d;
+  color: #f0f4ff;
+  border-color: #404040;
+}
+
+/* Dark Mode Buttons */
+.dark button[class*="bg-primary"],
+.dark .btn-primary {
+  background-color: #3b4bff;
+  border-color: #3b4bff;
+}
+
+.dark button[class*="bg-primary"]:hover,
+.dark .btn-primary:hover {
+  background-color: #2d3bdd;
+  border-color: #2d3bdd;
+}
+
+.dark .btn-secondary {
+  background-color: #1e2a6e;
+  color: #93c5fd;
+  border-color: #3b4bff;
+}
+
+.dark .btn-secondary:hover {
+  background-color: #2d3b8f;
+}
+
+.dark .btn-outline {
+  background-color: transparent;
+  color: #93c5fd;
+  border-color: #3b4bff;
+}
+
+.dark .btn-outline:hover {
+  background-color: #1e2a6e;
+}
+
+.dark .btn-ghost {
+  color: #e5e7eb;
+}
+
+.dark .btn-ghost:hover {
+  background-color: #2d2d2d;
+}
+
+/* Dark Mode Tables */
+.dark table {
+  background-color: #2d2d2d;
+}
+
+.dark thead {
+  background-color: #1f1f1f;
+}
+
+.dark th {
+  color: #f0f4ff;
+  border-color: #404040;
+}
+
+.dark td {
+  border-color: #404040;
+  color: #e5e7eb;
+}
+
+.dark tbody tr:hover {
+  background-color: #1f1f1f;
+}
+
+/* Dark Mode Badges */
+.dark .badge-planned {
+  background-color: #374151;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+
+.dark .badge-in-progress {
+  background-color: #1e3a8a;
+  color: #93c5fd;
+  border-color: #3b82f6;
+}
+
+.dark .badge-completed {
+  background-color: #064e3b;
+  color: #6ee7b7;
+  border-color: #10b981;
+}
+
+.dark .badge-on-hold {
+  background-color: #78350f;
+  color: #fcd34d;
+  border-color: #f59e0b;
+}
+
+/* Dark Mode Popper/Select */
+.dark [data-radix-popper-content-wrapper],
+.dark [data-radix-select-content],
+.dark .SelectContent,
+.dark [data-radix-dropdown-menu-content],
+.dark .DropdownMenuContent,
+.dark .DropdownMenuSubContent {
+  background-color: #2d2d2d !important;
+  color: #f0f4ff !important;
+  border: 1px solid #404040 !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark [data-radix-select-content] [data-radix-select-viewport],
+.dark .SelectViewport {
+  background-color: #2d2d2d !important;
+  color: #f0f4ff !important;
+}
+
+.dark .SelectContent,
+.dark .SelectViewport {
+  background-color: #2d2d2d !important;
+}
+
+/* Dark Mode Utilities */
+.dark .text-muted-foreground,
+.dark [class*="muted"],
+.dark .muted-foreground {
+  color: #9ca3af;
+}
+
+.dark .bg-muted,
+.dark .bg-background {
+  background-color: #1a1a1a;
+}
+
+/* Dark Mode Focus States */
+.dark button:focus-visible,
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark select:focus-visible,
+.dark a:focus-visible {
+  outline-color: #3b4bff;
+}
+
+/* ===================================================
+   SCROLLBAR STYLING (Dark Mode)
+=================================================== */
+.dark ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #404040;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}

@@ -1,0 +1,211 @@
+/* ===================================================
+   THEME TOGGLE COMPONENTS
+=================================================== */
+
+/* Main Theme Toggle Button */
+.theme-toggle-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: var(--bg-gray);
+  border: 1px solid var(--border-gray);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.theme-toggle-button:hover {
+  background-color: var(--light-blue);
+  border-color: var(--primary-blue);
+  transform: translateY(0);
+}
+
+.theme-toggle-button:active {
+  transform: scale(0.95);
+}
+
+/* Theme Icons */
+.theme-icon {
+  position: absolute;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-dark);
+}
+
+.theme-icon.sun-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-icon.moon-icon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+
+/* Active states */
+.dark .theme-icon.sun-icon {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+
+.dark .theme-icon.moon-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  color: #f0f4ff;
+}
+
+/* Dark mode button styling */
+.dark .theme-toggle-button {
+  background-color: #1f1f1f;
+  border-color: #404040;
+}
+
+.dark .theme-toggle-button:hover {
+  background-color: #2d2d2d;
+  border-color: #3b4bff;
+}
+
+/* ===================================================
+   COMPACT THEME TOGGLE
+=================================================== */
+.theme-toggle-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border-radius: 6px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-compact:hover {
+  background-color: var(--bg-gray);
+  border-color: var(--border-gray);
+  transform: scale(1.1);
+}
+
+.dark .theme-toggle-compact:hover {
+  background-color: #1f1f1f;
+  border-color: #404040;
+}
+
+/* ===================================================
+   SWITCH STYLE THEME TOGGLE
+=================================================== */
+.theme-toggle-switch-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-toggle-switch-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.theme-label-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.dark .theme-label-text {
+  color: #f0f4ff;
+}
+
+/* The switch itself */
+.theme-toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  background-color: #cbd5e1;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 0;
+}
+
+.theme-toggle-switch:hover {
+  background-color: #94a3b8;
+  transform: none;
+}
+
+.theme-toggle-switch.active {
+  background-color: var(--primary-blue);
+}
+
+.dark .theme-toggle-switch.active {
+  background-color: #3b4bff;
+}
+
+/* The sliding circle */
+.theme-toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle-switch.active .theme-toggle-slider {
+  transform: translateX(24px);
+}
+
+/* Focus states for accessibility */
+.theme-toggle-button:focus-visible,
+.theme-toggle-compact:focus-visible,
+.theme-toggle-switch:focus-visible {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+.dark .theme-toggle-button:focus-visible,
+.dark .theme-toggle-compact:focus-visible,
+.dark .theme-toggle-switch:focus-visible {
+  outline-color: #3b4bff;
+}
+
+/* ===================================================
+   UTILITY CLASSES FOR THEME-AWARE COMPONENTS
+=================================================== */
+.theme-transition {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* For elements that need immediate theme updates */
+.theme-bg {
+  background-color: var(--bg-light);
+}
+
+.theme-text {
+  color: var(--text-dark);
+}
+
+.dark .theme-bg {
+  background-color: #1a1a1a;
+}
+
+.dark .theme-text {
+  color: #f0f4ff;
+}
