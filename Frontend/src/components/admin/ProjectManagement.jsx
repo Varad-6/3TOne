@@ -405,7 +405,7 @@ export function ProjectManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Project Management</h1>
@@ -482,12 +482,12 @@ export function ProjectManagement() {
       </Card>
 
       {/* Projects Table */}
-      <Card>
+      <Card className="w-full min-w-0">
         <CardHeader>
           <CardTitle>Projects ({filteredProjects.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
+          <div className="rounded-md border overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>

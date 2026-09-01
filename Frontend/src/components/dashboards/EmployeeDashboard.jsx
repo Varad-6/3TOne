@@ -34,7 +34,6 @@ export function EmployeeDashboard() {
     try {
       setLoading(true);
       const data = await dashboardService.getEmployeeDashboard();
-      console.log("Dashboard data:", data);
       setStats(data);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
@@ -46,8 +45,11 @@ export function EmployeeDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
       </div>
     );
   }

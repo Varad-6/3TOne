@@ -456,7 +456,7 @@ export function UserManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
@@ -513,12 +513,12 @@ export function UserManagement() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="w-full min-w-0">
         <CardHeader>
           <CardTitle>Employees ({filteredEmployees.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
+          <div className="rounded-md border overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -616,6 +616,7 @@ export function UserManagement() {
                                   size="sm"
                                   onClick={() => handleEdit(emp)}
                                   title="Edit"
+                                  aria-label="Edit"
                                 >
                                   <Edit className="h-4 w-4 text-green-600" />
                                 </Button>
@@ -624,6 +625,7 @@ export function UserManagement() {
                                   size="sm"
                                   onClick={() => confirmDeactivation(emp)}
                                   title="Deactivate"
+                                  aria-label="Delete"
                                 >
                                   <Trash2 className="h-4 w-4 text-destructive text-red-600" />
                                 </Button>

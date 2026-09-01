@@ -179,8 +179,7 @@ export function Profile() {
               </AvatarFallback>
             </Avatar> */}
             <div
-              className="h-16 w-16 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#070959" }}
+              className="h-16 w-16 rounded-full flex items-center justify-center bg-primary"
             >
               <span className="text-3xl font-semibold text-white">
                 {getInitials(fullName)}

@@ -13,8 +13,7 @@ class Client {
     let query = `
       SELECT 
         client_id, client_name, client_code, zoho_crm_code, alias, 
-        spoc_name, spoc_phone, spoc_email, url, is_active, 
-        created_at, updated_at
+        is_active
       FROM client_master
       WHERE 1=1
     `;

@@ -5,7 +5,7 @@ import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Bell, Check, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-// import notificationService from '@/services/notificationService';
+import notificationService from '../../services/notificationService';
 
 export  function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -17,11 +17,11 @@ export  function Notifications() {
 
   const fetchNotifications = async () => {
     try {
-      // const data = await notificationService.getAll();
-      // setNotifications(data.notifications);
-      // setUnreadCount(data.notifications.filter((n) => !n.is_read).length);
-      setNotifications([]);
-      setUnreadCount(0);
+      const data = await notificationService.getNotifications();
+      // Assuming data is array or data.notifications
+      const notifs = Array.isArray(data) ? data : data.notifications || [];
+      setNotifications(notifs);
+      setUnreadCount(notifs.filter((n) => !n.is_read).length);
     } catch (error) {
       console.error('Failed to fetch notifications', error);
     }
@@ -29,7 +29,7 @@ export  function Notifications() {
 
   const markAsRead = async (id) => {
     try {
-      // await notificationService.markAsRead(id);
+      await notificationService.markAsRead(id);
       setNotifications((prev) =>
         prev.map((n) =>
           n.notification_id === id ? { ...n, is_read: true } : n
@@ -43,7 +43,7 @@ export  function Notifications() {
 
   const markAllAsRead = async () => {
     try {
-      // await notificationService.markAllAsRead();
+      await notificationService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
       toast.success('All notifications marked as read');
@@ -54,7 +54,7 @@ export  function Notifications() {
 
   const deleteNotification = async (id) => {
     try {
-      // await notificationService.delete(id);
+      await notificationService.deleteNotification(id);
       setNotifications((prev) =>
         prev.filter((n) => n.notification_id !== id)
       );

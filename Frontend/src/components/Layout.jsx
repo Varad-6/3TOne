@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../context/ThemeContext";
@@ -30,8 +30,26 @@ export const Layout = ({ children }) => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -125,30 +143,38 @@ export const Layout = ({ children }) => {
   const currentNav = user ? navigation[user.role] || [] : [];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gray-50 dark:bg-[#1a1a1a]">
+    <div className="flex h-screen w-full overflow-hidden bg-zinc-100 dark:bg-[#09090b]">
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen transition-transform ${
+        className={`fixed top-0 left-0 z-40 h-screen transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } bg-white dark:bg-[#1a1a1a] border-r border-gray-200 dark:border-[#404040] w-64 flex flex-col`}
+        } bg-zinc-100 dark:bg-[#09090b] border-none w-64 flex flex-col`}
       >
         {/* Logo Section */}
-        <div className="flex items-center gap-3 p-6 border-b border-gray-200 dark:border-[#404040]">
-          {/* Logo - switches based on theme */}
-          <div className="w-20 h-20 flex-shrink-0">
+        <div className="flex items-center gap-3 px-6 pt-8 pb-6">
+          {/* Logo container with a polished white card look to hide awkward image backgrounds */}
+          <div className="w-12 h-12 flex-shrink-0 bg-white dark:bg-white/90 rounded-xl shadow-sm p-1.5 flex items-center justify-center">
             <img
-              src={theme === "dark" ? ais_logo : ais_logo}
+              src={ais_logo}
               alt="AIS Logo"
-              className="w-full h-full object-contain transition-opacity duration-300"
+              className="w-full h-full object-contain mix-blend-multiply"
             />
           </div>
 
           {/* Text */}
-          <div>
-            <h1 className="text-2xl font-bold text-primary dark:text-[#f0f4ff]">
-              TimeTrack
+          <div className="flex flex-col justify-center">
+            <h1 className="text-xl font-bold tracking-tight text-primary dark:text-foreground leading-none mb-1">
+              3TOne
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               {user?.role?.toLowerCase()}
             </p>
           </div>
@@ -162,10 +188,10 @@ export const Layout = ({ children }) => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
+                className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 active:scale-[0.98] ${
                   isActive
-                    ? "bg-primary dark:bg-[#3b4bff] text-white"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2d2d2d]"
+                    ? "bg-primary text-white shadow-soft"
+                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100"
                 }`}
               >
                 <item.icon className="w-5 h-5 mr-3" />
@@ -176,26 +202,22 @@ export const Layout = ({ children }) => {
         </nav>
 
         {/* User Section with Dropdown */}
-        <div className="p-4 border-t border-gray-200 dark:border-[#404040] relative">
+        <div className="p-4 relative mt-auto">
           {/* Dropdown Menu */}
           {userMenuOpen && (
             <div
-              className="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-[#2d2d2d] border rounded-lg shadow-lg overflow-hidden"
-              style={{
-                borderColor: theme === "dark" ? "#404040" : "#070959",
-                borderWidth: "1.5px",
-              }}
+              className="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-card border-[1.5px] border-[#070959] dark:border-border rounded-lg shadow-lg overflow-hidden"
             >
               <button
                 onClick={handleProfileClick}
-                className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1f1f1f] transition-colors"
+                className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors"
               >
                 <User className="w-4 h-4 mr-3" />
                 Profile
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-[#7f1d1d] transition-colors border-t border-gray-100 dark:border-[#404040]"
+                className="w-full flex items-center px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-[#7f1d1d] transition-colors border-t border-gray-100 dark:border-border"
               >
                 <LogOut className="w-4 h-4 mr-3" />
                 Logout
@@ -206,39 +228,19 @@ export const Layout = ({ children }) => {
           {/* User Info Button */}
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            style={
-              userMenuOpen
-                ? {
-                    backgroundColor: theme === "dark" ? "#3b4bff" : "#070959",
-                    color: "white",
-                  }
-                : {}
-            }
             className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors ${
-              userMenuOpen ? "" : "hover:bg-gray-50 dark:hover:bg-[#2d2d2d]"
+              userMenuOpen 
+                ? "bg-[#070959] dark:bg-primary text-white" 
+                : "hover:bg-gray-50 dark:hover:bg-accent"
             }`}
-            onMouseEnter={(e) => {
-              if (userMenuOpen) {
-                e.currentTarget.style.backgroundColor =
-                  theme === "dark" ? "#3b4bff" : "#070959";
-                e.currentTarget.style.transform = "none";
-              }
-            }}
           >
             {/* User Initials Circle */}
             <div
-              style={
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
                 userMenuOpen
-                  ? {
-                      backgroundColor: "white",
-                      color: theme === "dark" ? "#3b4bff" : "#070959",
-                    }
-                  : {
-                      backgroundColor: theme === "dark" ? "#3b4bff" : "#070959",
-                      color: "white",
-                    }
-              }
-              className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-colors"
+                  ? "bg-white text-[#070959] dark:text-primary"
+                  : "bg-[#070959] dark:bg-primary text-white"
+              }`}
             >
               {getUserInitials(user?.name)}
             </div>
@@ -248,7 +250,7 @@ export const Layout = ({ children }) => {
                 className={`text-sm font-medium truncate ${
                   userMenuOpen
                     ? "text-white"
-                    : "text-gray-900 dark:text-gray-100"
+                    : "text-gray-900 dark:text-foreground"
                 }`}
               >
                 {user?.name}
@@ -257,7 +259,7 @@ export const Layout = ({ children }) => {
                 className={`text-xs truncate ${
                   userMenuOpen
                     ? "text-gray-200"
-                    : "text-gray-500 dark:text-gray-400"
+                    : "text-gray-500 dark:text-muted-foreground"
                 }`}
               >
                 {user?.email}
@@ -267,7 +269,7 @@ export const Layout = ({ children }) => {
               className={`w-4 h-4 transition-transform ${
                 userMenuOpen
                   ? "rotate-180 text-white"
-                  : "text-gray-400 dark:text-gray-500"
+                  : "text-gray-400 dark:text-muted-foreground"
               }`}
             />
           </button>
@@ -276,27 +278,31 @@ export const Layout = ({ children }) => {
 
       {/* Main content */}
       <div
-        className={`flex-1 flex flex-col min-w-0 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } transition-all overflow-hidden`}
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 overflow-hidden ${
+          sidebarOpen ? "lg:ml-64" : ""
+        }`}
       >
+        {/* The "App Frame" */}
+        <div className="flex-1 flex flex-col m-0 lg:my-3 lg:mr-3 bg-white dark:bg-[#121214] lg:rounded-2xl shadow-soft lg:border border-zinc-200/50 dark:border-zinc-800/50 overflow-hidden relative">
+
         {/* Top bar */}
-        <header className="bg-white dark:bg-[#1a1a1a] border-b border-gray-200 dark:border-[#404040] sticky top-0 z-30 flex items-center justify-between px-4 py-3">
+        <header className="bg-white/80 dark:bg-[#121214]/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800/50 sticky top-0 z-30 flex items-center justify-between px-6 py-4">
           <Button
             variant="ghost"
             size="icon"
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hover:bg-gray-100 dark:hover:bg-[#2d2d2d]"
+            className="hover:bg-gray-100 dark:hover:bg-accent"
           >
             {sidebarOpen ? (
-              <X className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              <X className="w-5 h-5 text-gray-700 dark:text-foreground" />
             ) : (
-              <Menu className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              <Menu className="w-5 h-5 text-gray-700 dark:text-foreground" />
             )}
           </Button>
 
           <div className="flex-1 px-4">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-foreground">
               {currentNav.find((item) => item.href === location.pathname)
                 ?.name || "Dashboard"}
             </h2>
@@ -310,17 +316,20 @@ export const Layout = ({ children }) => {
             <Button
               variant="ghost"
               size="icon"
-              className="hover:bg-gray-100 dark:hover:bg-[#2d2d2d]"
+              aria-label="Notifications"
+              className="hover:bg-gray-100 dark:hover:bg-accent"
+              onClick={() => navigate('/notifications')}
             >
-              <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              <Bell className="w-5 h-5 text-gray-700 dark:text-foreground" />
             </Button>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 min-w-0 p-6 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-[#0b0b29]">
+        <main className="flex-1 min-w-0 p-6 overflow-x-hidden overflow-y-auto">
           {children}
         </main>
+        </div>
       </div>
     </div>
   );

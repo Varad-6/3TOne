@@ -71,6 +71,7 @@
 
   /* ---------- Dark Mode (Midnight Blue Theme) ---------- */
   .dark {
+    color-scheme: dark;
     --background: #0b0b29;
     --foreground: #f1f5ff;
 
@@ -165,41 +166,12 @@ html {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #e8f0fe;
+  background: var(--muted);
 }
 ::-webkit-scrollbar-thumb {
-  background: #020242;
+  background: var(--muted-foreground);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #10103b;
-}
-
-/* ---------- Buttons ---------- */
-button {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-  border-radius: var(--radius);
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-button:hover {
-  background-color: color-mix(in srgb, var(--primary) 85%, white 15%);
-  transform: translateY(-1px);
-}
-button:active {
-  transform: translateY(0);
-}
-button.secondary {
-  background-color: var(--secondary);
-  color: var(--secondary-foreground);
-}
-button.secondary:hover {
-  background-color: color-mix(in srgb, var(--secondary) 85%, white 15%);
-}
-button.destructive {
-  background-color: var(--destructive);
-  color: var(--destructive-foreground);
-}
-button.destructive:hover {
-  background-color: color-mix(in srgb, var(--destructive) 90%, white 10%);
+  background: var(--primary);
 }

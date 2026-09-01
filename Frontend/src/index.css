@@ -15,6 +15,28 @@
   --text-muted: #6b7280;
   --bg-light: #ffffff;
   --bg-gray: #f9fafb;
+
+  /* Tailwind Design Tokens — Light Mode */
+  --background: #fafafa;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #4f46e5;
+  --radius: 0.75rem;
 }
 
 /* ===================================================
@@ -130,104 +152,7 @@ a:hover {
   text-decoration: underline;
 }
 
-/* ===================================================
-   SIDEBAR - YOUR CUSTOM LAYOUT
-=================================================== */
-aside {
-  background-color: var(--bg-light);
-  border-right: 1px solid var(--border-gray);
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease;
-}
 
-aside h1 {
-  color: var(--primary-blue);
-  font-size: 22px;
-}
-
-aside p {
-  color: var(--text-muted);
-  font-size: 12px;
-}
-
-/* Sidebar Navigation Links */
-aside nav a {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  margin: 4px 0;
-  border-radius: 8px;
-  border-left: 3px solid transparent;
-  padding-left: 16px;
-  color: var(--text-dark);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  background-color: transparent;
-}
-
-/* Sidebar Link - Hover */
-aside nav a:hover {
-  background-color: #f3f4f6;
-  color: var(--text-dark);
-  text-decoration: none;
-}
-
-/* Sidebar Link - Active (Your bg-primary class) */
-aside nav a.bg-primary {
-  background-color: var(--primary-blue);
-  color: var(--text-light);
-  border-left-color: var(--primary-blue);
-  font-weight: 600;
-}
-
-aside nav a.bg-primary:hover {
-  background-color: var(--dark-blue);
-  border-left-color: var(--dark-blue);
-}
-
-/* Sidebar User Section */
-aside button {
-  transition: all 0.2s ease;
-}
-
-aside button:hover {
-  background-color: #f9fafb;
-}
-
-/* Sidebar Dropdown Menu */
-aside .absolute.bottom-full {
-  background-color: var(--bg-light);
-  border: 1px solid var(--border-gray);
-  border-radius: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease;
-}
-
-aside .absolute.bottom-full button {
-  color: var(--text-dark);
-  text-align: left;
-  width: 100%;
-}
-
-aside .absolute.bottom-full button:hover {
-  background-color: #f3f4f6;
-}
-
-aside .absolute.bottom-full button[class*="text-red"],
-aside .absolute.bottom-full .text-red-600 {
-  color: #dc2626;
-}
-
-aside .absolute.bottom-full button[class*="text-red"]:hover,
-aside .absolute.bottom-full .text-red-600:hover {
-  background-color: #fee2e2;
-}
 
 /* ===================================================
    HEADER / TOP BAR
@@ -260,17 +185,7 @@ header h2 {
     border-color 0.3s ease;
 }
 
-/* Card Header */
-[class*="CardHeader"],
-.card-header {
-  background-color: var(--bg-gray);
-  border-bottom: 1px solid var(--border-gray);
-  border-radius: 8px 8px 0 0;
-  padding: 24px;
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease;
-}
+
 
 /* Card Title */
 [class*="CardTitle"],
@@ -349,14 +264,7 @@ header h2 {
 /* ===================================================
    BUTTONS - ALL TYPES WITH BACKGROUNDS
 =================================================== */
-button {
-  transition: all 0.2s ease;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  font-weight: 500;
-  font-size: 14px;
-}
+
 
 /* Primary Button */
 button[class*="bg-primary"],
@@ -481,53 +389,15 @@ select:disabled {
   opacity: 0.6;
 }
 
-/* ===================================================
-   TABLES
-=================================================== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: var(--bg-light);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: background-color 0.3s ease;
+/* Fix for date inputs in dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) hue-rotate(180deg);
 }
 
-thead {
-  background-color: var(--bg-gray);
-  transition: background-color 0.3s ease;
-}
 
-th {
-  padding: 12px 16px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--primary-blue);
-  border-bottom: 1px solid var(--border-gray);
-}
-
-td {
-  padding: 12px 16px;
-  font-size: 14px;
-  color: var(--text-dark);
-  border-bottom: 1px solid var(--border-gray);
-  transition:
-    color 0.3s ease,
-    border-color 0.3s ease;
-}
-
-tbody tr {
-  transition: background-color 0.2s ease;
-}
-
-tbody tr:hover {
-  background-color: var(--bg-gray);
-}
-
-tbody tr:last-child td {
-  border-bottom: none;
-}
 
 /* ===================================================
    DIALOGS & MODALS
@@ -793,11 +663,43 @@ a:focus-visible {
 =================================================== */
 .dark {
   color-scheme: dark;
+
+  /* Tailwind Design Tokens — Dark Mode */
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #18181b;
+  --card-foreground: #fafafa;
+  --popover: #18181b;
+  --popover-foreground: #fafafa;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #6366f1;
+
+  /* Legacy variables for dark mode */
+  --primary-blue: #6366f1;
+  --light-blue: #3730a3;
+  --dark-blue: #4f46e5;
+  --border-gray: #27272a;
+  --text-dark: #fafafa;
+  --text-light: #ffffff;
+  --text-muted: #a1a1aa;
+  --bg-light: #18181b;
+  --bg-gray: #09090b;
 }
 
 .dark body {
-  background-color: #1a1a1a;
-  color: #f0f4ff;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 /* Dark Mode Typography */
@@ -887,61 +789,7 @@ a:focus-visible {
   box-shadow: 0 0 0 3px rgba(59, 75, 255, 0.2) !important;
 }
 
-/* Dark Mode Sidebar */
-.dark aside {
-  background-color: #1a1a1a;
-  border-color: #404040;
-}
 
-.dark aside h1 {
-  color: #f0f4ff;
-}
-
-.dark aside p {
-  color: #9ca3af;
-}
-
-.dark aside nav a {
-  color: #e5e7eb;
-}
-
-.dark aside nav a:hover:not(.bg-primary) {
-  background-color: #2d2d2d;
-}
-
-.dark aside nav a.bg-primary {
-  background-color: #3b4bff;
-  color: #ffffff;
-  border-left-color: #3b4bff;
-}
-
-.dark aside nav a.bg-primary:hover {
-  background-color: #2d3bdd;
-  border-left-color: #2d3bdd;
-}
-
-.dark aside button:hover {
-  background-color: #2d2d2d;
-}
-
-.dark aside .absolute.bottom-full {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-}
-
-.dark aside .absolute.bottom-full button {
-  color: #e5e7eb;
-}
-
-.dark aside .absolute.bottom-full button:hover {
-  background-color: #1f1f1f;
-}
-
-.dark aside .absolute.bottom-full button[class*="text-red"]:hover,
-.dark aside .absolute.bottom-full .text-red-600:hover {
-  background-color: #7f1d1d;
-}
 
 /* Dark Mode Header */
 .dark header {
@@ -960,11 +808,7 @@ a:focus-visible {
   border-color: #404040;
 }
 
-.dark [class*="CardHeader"],
-.dark .card-header {
-  background-color: #1f1f1f;
-  border-color: #404040;
-}
+
 
 .dark [class*="CardTitle"],
 .dark .card-title {
@@ -1010,69 +854,9 @@ a:focus-visible {
   border-color: #404040;
 }
 
-/* Dark Mode Buttons */
-.dark button[class*="bg-primary"],
-.dark .btn-primary {
-  background-color: #3b4bff;
-  border-color: #3b4bff;
-}
 
-.dark button[class*="bg-primary"]:hover,
-.dark .btn-primary:hover {
-  background-color: #2d3bdd;
-  border-color: #2d3bdd;
-}
 
-.dark .btn-secondary {
-  background-color: #1e2a6e;
-  color: #93c5fd;
-  border-color: #3b4bff;
-}
 
-.dark .btn-secondary:hover {
-  background-color: #2d3b8f;
-}
-
-.dark .btn-outline {
-  background-color: transparent;
-  color: #93c5fd;
-  border-color: #3b4bff;
-}
-
-.dark .btn-outline:hover {
-  background-color: #1e2a6e;
-}
-
-.dark .btn-ghost {
-  color: #e5e7eb;
-}
-
-.dark .btn-ghost:hover {
-  background-color: #2d2d2d;
-}
-
-/* Dark Mode Tables */
-.dark table {
-  background-color: #2d2d2d;
-}
-
-.dark thead {
-  background-color: #1f1f1f;
-}
-
-.dark th {
-  color: #f0f4ff;
-  border-color: #404040;
-}
-
-.dark td {
-  border-color: #404040;
-  color: #e5e7eb;
-}
-
-.dark tbody tr:hover {
-  background-color: #1f1f1f;
-}
 
 /* Dark Mode Badges */
 .dark .badge-planned {

@@ -205,9 +205,9 @@ export const getPendingTimesheets = async (req, res) => {
         te.total_hours as hours_logged,
         te.description,
         te.status,
-        ts.name as status_name,
-        te.created_at,
-        te.updated_at
+        ts.name as status_name
+        -- te.created_at,
+        -- te.updated_at
       FROM daily_timesheet_entries te
       LEFT JOIN employees e ON te.employee_id = e.employee_id
       LEFT JOIN employees m ON te.manager_id = m.employee_id
@@ -489,7 +489,7 @@ export const getTimesheetHistory = async (req, res) => {
       params.push(statusId);
     }
 
-    query += " ORDER BY te.created_at DESC LIMIT 50";
+    query += " ORDER BY te.entry_date DESC LIMIT 50";
 
     const result = await pool.query(query, params);
 

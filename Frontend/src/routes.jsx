@@ -23,6 +23,7 @@ import { EmployeeTimesheetEntry } from "./components/employee/EmployeeTimesheetE
 import { TimesheetHistory } from "./components/employee/TimesheetHistory";
 import { Profile } from "./components/common/Profile";
 import { Notifications } from "./components/common/Notifications";
+import { NotFound } from "./components/common/NotFound";
 import { useAuth } from "./hooks/useAuth";
 
 /**
@@ -382,9 +383,9 @@ export function AppRoutes() {
       </Route>
 
       {/* ============================================ */}
-      {/* CATCH ALL - Redirect to Login */}
+      {/* CATCH ALL - 404 Not Found */}
       {/* ============================================ */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

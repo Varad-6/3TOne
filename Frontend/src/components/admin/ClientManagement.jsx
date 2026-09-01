@@ -240,7 +240,7 @@ export function ClientManagement() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Client Management</h1>
@@ -274,12 +274,12 @@ export function ClientManagement() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="w-full min-w-0">
         <CardHeader>
           <CardTitle>Clients ({filteredClients.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
+          <div className="rounded-md border overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>

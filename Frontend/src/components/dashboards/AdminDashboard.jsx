@@ -15,7 +15,9 @@ import employeeService from "../../services/employeeService";
 import timesheetService from "../../services/timesheetService";
 import projectService from "../../services/projectService";
 import { toast } from "sonner";
-import ExportButton from "../ExportButton"; // ← Add this import
+import ExportButton from "../ExportButton";
+import { FadeInStagger, FadeInItem, FadeIn } from "../ui/fade-in";
+import { NumberTicker } from "../ui/number-ticker";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -78,13 +80,6 @@ const AdminDashboard = () => {
       const timesheetsData = getData(timesheetsRes);
       const approvedData = getData(approvedRes);
 
-      console.log("📊 Dashboard data:", {
-        employeesData,
-        projectsData,
-        timesheetsData,
-        approvedData,
-      });
-
       // projectService.getAllProjects returns status as status name
       const activeProjects =
         projectsData?.projects?.filter(
@@ -129,9 +124,12 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-lg">Loading dashboard...</div>
-      </div>
+      <FadeIn className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+          <p className="text-sm font-medium text-muted-foreground animate-pulse">Syncing with backend...</p>
+        </div>
+      </FadeIn>
     );
   }
 
@@ -153,64 +151,97 @@ const AdminDashboard = () => {
         <ExportButton endpoint="all" label="Download Reports" />
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+      {/* Modern Bento-Box Stats */}
+      <FadeInStagger staggerDelay={0.1} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Card 1: Total Employees */}
+        <FadeInItem>
+        <Card className="relative overflow-hidden group border-none shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-background">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-[-100%] group-hover:translate-x-[100%] pointer-events-none" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
               Total Employees
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
+              <Users className="h-4 w-4 text-indigo-700 dark:text-indigo-400" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalEmployees}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-foreground">
+              <NumberTicker value={stats.totalEmployees} />
+            </div>
+            <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70 mt-1 font-medium">
               Active users in system
             </p>
           </CardContent>
         </Card>
+        </FadeInItem>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        {/* Card 2: Active Projects */}
+        <FadeInItem>
+        <Card className="relative overflow-hidden group border-none shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-background">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
               Active Projects
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
+              <FileText className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeProjects}</div>
-            <p className="text-xs text-muted-foreground">Currently running</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Timesheets
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingTimesheets}</div>
-            <p className="text-xs text-muted-foreground">Awaiting approval</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Approved This Month
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.approvedTimesheets}</div>
-            <p className="text-xs text-muted-foreground">
-              Successfully approved
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-foreground">
+              <NumberTicker value={stats.activeProjects} />
+            </div>
+            <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-1 font-medium">
+              Currently running
             </p>
           </CardContent>
         </Card>
-      </div>
+        </FadeInItem>
+
+        {/* Card 3: Pending Timesheets */}
+        <FadeInItem>
+        <Card className="relative overflow-hidden group border-none shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+              Pending Timesheets
+            </CardTitle>
+            <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-amber-700 dark:text-amber-400" />
+            </div>
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-foreground">
+              <NumberTicker value={stats.pendingTimesheets} />
+            </div>
+            <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-1 font-medium">
+              Awaiting approval
+            </p>
+          </CardContent>
+        </Card>
+        </FadeInItem>
+
+        {/* Card 4: Approved This Month */}
+        <FadeInItem>
+        <Card className="relative overflow-hidden group border-none shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+              Approved Timesheets
+            </CardTitle>
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+              <CheckCircle className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+            </div>
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-foreground">
+              <NumberTicker value={stats.approvedTimesheets} />
+            </div>
+            <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-1 font-medium">
+              Successfully processed
+            </p>
+          </CardContent>
+        </Card>
+        </FadeInItem>
+      </FadeInStagger>
     </div>
   );
 };

@@ -12,9 +12,8 @@ class NotificationService {
     await api.put(`/notifications/${id}/read`);
   }
 
-  // Mark all notifications as read
   async markAllAsRead() {
-    await api.put("/notifications/mark-all-read");
+    await api.put("/notifications/read-all");
   }
 
   // Delete a notification

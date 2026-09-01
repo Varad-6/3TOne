@@ -21,7 +21,7 @@ const ExportButton = ({ endpoint = "all", label = "Export Data" }) => {
       const contentDisposition = response.headers["content-disposition"];
       const filename = contentDisposition
         ? contentDisposition.match(/filename="(.+)"/)?.[1]
-        : `TimeTrack_Report_${Date.now()}.xlsx`;
+        : `3TOne_Report_${Date.now()}.xlsx`;
 
       // Create download link
       const blob = new Blob([response.data]);

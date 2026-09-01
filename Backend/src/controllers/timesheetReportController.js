@@ -3410,7 +3410,7 @@ export const getTimesheetReport = async (req, res) => {
       employee: "e.first_name",
       project: "pm.project_name",
       ticket: "tm.ticket_name",
-      submitted_at: "dte.submitted_at",
+      // submitted_at: "dte.submitted_at",
     };
     const sortCol = ALLOWED_SORT[sortBy] || "dte.entry_date";
     const dir = sortDir === "asc" ? "ASC" : "DESC";
@@ -3541,8 +3541,8 @@ export const getTimesheetReport = async (req, res) => {
       LEFT JOIN client_master  cm   ON cm.client_id      = dte.client_id
       LEFT JOIN ticket_master  tm   ON tm.ticket_id      = dte.ticket_id
       LEFT JOIN employees      mgr  ON mgr.employee_id   = dte.manager_id
-      LEFT JOIN employees      apr  ON apr.employee_id   = dte.approved_by
-      LEFT JOIN employees      rej  ON rej.employee_id   = dte.rejected_by
+      -- LEFT JOIN employees      apr  ON apr.employee_id   = dte.approved_by
+      -- LEFT JOIN employees      rej  ON rej.employee_id   = dte.rejected_by
       LEFT JOIN task_master    task ON task.task_id      = dte.task_id
       LEFT JOIN departments    dtsk ON dtsk.id           = task.department
     `;
@@ -3564,12 +3564,12 @@ export const getTimesheetReport = async (req, res) => {
         dte.non_billable_hours,
         dte.ticket_number,
         dte.description,
-        dte.submitted_at,
+        -- dte.submitted_at,
         dte.approved_at,
         dte.rejected_at,
         dte.rejection_reason,
-        dte.created_at,
-        dte.updated_at,
+        -- dte.created_at,
+        -- dte.updated_at,
 
         -- Status
         ts.name                                              AS status,
@@ -3849,7 +3849,7 @@ export const getGroupedTimesheetReport = async (req, res) => {
             'description',        dte.description,
             'ticket_number',      dte.ticket_number,
             'status',             ts.name,
-            'submitted_at',       dte.submitted_at,
+            -- 'submitted_at',       dte.submitted_at,
             'approved_at',        dte.approved_at,
             'rejected_at',        dte.rejected_at,
             'rejection_reason',   dte.rejection_reason,
@@ -4959,7 +4959,7 @@ export const exportTimesheetReport = async (req, res) => {
       employee: "e.first_name",
       project: "pm.project_name",
       ticket: "tm.ticket_name",
-      submitted_at: "dte.submitted_at",
+      // submitted_at: "dte.submitted_at",
     };
     const sortCol = ALLOWED_SORT[sortBy] || "dte.entry_date";
     const dir = sortDir === "asc" ? "ASC" : "DESC";
@@ -5082,7 +5082,7 @@ export const exportTimesheetReport = async (req, res) => {
          dte.description,
          dte.ticket_number,
          mgr.first_name || ' ' || mgr.last_name      AS manager_name,
-         dte.submitted_at,
+         -- dte.submitted_at,
          COALESCE(apr.first_name || ' ' || apr.last_name, '') AS approved_by_name,
          dte.approved_at,
          dte.rejection_reason
@@ -5094,7 +5094,7 @@ export const exportTimesheetReport = async (req, res) => {
        LEFT JOIN client_master  cm   ON cm.client_id      = dte.client_id
        LEFT JOIN ticket_master  tm   ON tm.ticket_id      = dte.ticket_id
        LEFT JOIN employees      mgr  ON mgr.employee_id   = dte.manager_id
-       LEFT JOIN employees      apr  ON apr.employee_id   = dte.approved_by
+       -- LEFT JOIN employees      apr  ON apr.employee_id   = dte.approved_by
        LEFT JOIN task_master    task ON task.task_id      = dte.task_id
        ${whereClause}
        ORDER BY ${sortCol} ${dir}`,
