@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "./ui/button";
@@ -64,11 +65,21 @@ export function Login() {
         {/* Glow Effects */}
         <div className="absolute w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] -top-40 -left-40 mix-blend-screen pointer-events-none" />
         <div className="absolute w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-[100px] bottom-0 right-0 mix-blend-screen pointer-events-none" />
+        <motion.div
+          animate={{ y: [0, -20, 0], opacity: [0.15, 0.25, 0.15] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute w-[300px] h-[300px] bg-indigo-500/20 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        />
         
         {/* Abstract geometric grid overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
 
-        <div className="relative z-10 text-center px-12 max-w-2xl text-white">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+          className="relative z-10 text-center px-12 max-w-2xl text-white"
+        >
           <div className="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur-md rounded-2xl mb-8 border border-white/10 shadow-2xl">
             <img
               src={ais_logo}
@@ -82,12 +93,18 @@ export function Login() {
           <p className="text-zinc-400 text-lg leading-relaxed max-w-lg mx-auto">
             Streamline your workforce tracking with zero friction. Built for modern teams who demand performance and precision.
           </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* ── Right side: Login Form ── */}
       <div className="flex-1 flex items-center justify-center p-8 sm:p-12 relative">
-        <div className="w-full max-w-md space-y-8 relative z-10">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#6366f108_1px,transparent_1px),linear-gradient(to_bottom,#6366f108_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
+          className="w-full max-w-md space-y-8 relative z-10"
+        >
           
           <div className="text-center lg:text-left">
             {/* Mobile-only logo */}
@@ -106,7 +123,12 @@ export function Login() {
           <form onSubmit={handleSubmit} className="space-y-5 mt-8" noValidate>
             <div className="space-y-4">
               {/* Email */}
-              <div className="space-y-2">
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="space-y-2"
+              >
                 <label
                   htmlFor="email"
                   className="text-sm font-medium text-foreground"
@@ -128,10 +150,15 @@ export function Login() {
                     required
                   />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Password */}
-              <div className="space-y-2">
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="space-y-2"
+              >
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="password"
@@ -173,7 +200,7 @@ export function Login() {
                     )}
                   </button>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             <Button 
@@ -188,7 +215,7 @@ export function Login() {
             </Button>
           </form>
 
-        </div>
+        </motion.div>
       </div>
     </div>
   );

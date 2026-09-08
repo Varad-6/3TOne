@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import {
   Card,
@@ -435,22 +436,26 @@ export function ManagerTicketAssignmentPage() {
   const budget = calculateBudget();
   const isOverBudget = budget.remaining < 0;
 
+  const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+  const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-6">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-7xl mx-auto p-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight">
             Assign Tickets to Team
           </h1>
           <p className="text-muted-foreground mt-1">
             Assign project tickets to your team members with hour limits.
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Project Selection */}
-      <Card>
+      <motion.div variants={item}>
+        <Card className="border-none shadow-soft bg-white dark:bg-card">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
@@ -492,10 +497,12 @@ export function ManagerTicketAssignmentPage() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Tickets List */}
       {selectedProjectId && (
-        <Card>
+        <motion.div variants={item}>
+          <Card className="border-none shadow-soft bg-white dark:bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TicketIcon className="h-5 w-5" />
@@ -570,6 +577,7 @@ export function ManagerTicketAssignmentPage() {
             )}
           </CardContent>
         </Card>
+        </motion.div>
       )}
 
       {/* Assignment Dialog */}
@@ -818,7 +826,7 @@ export function ManagerTicketAssignmentPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
 

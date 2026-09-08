@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -928,7 +929,7 @@ export function ManagerTimesheetEntry() {
   const StatusBadge = ({ status }) => {
     const statusName = getStatusName(status);
 
-    let color = "bg-gray-100 text-gray-700 border-gray-200";
+    let color = "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-zinc-800";
     let icon = <Clock className="w-3 h-3 mr-1" />;
 
     if (statusName === "Submitted" || statusName === "Pending_Admin") {
@@ -969,12 +970,15 @@ export function ManagerTimesheetEntry() {
       .map((e) => e.entry_date),
   ).size;
 
+  const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+  const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+
   return (
-    <div className="space-y-6 p-1">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-lg border shadow-sm">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 p-1">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-card p-4 rounded-lg border shadow-sm">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-2xl font-bold tracking-tight text-gray-800 dark:text-gray-100">
               Weekly Timesheet
             </h2>
             <Badge
@@ -987,30 +991,30 @@ export function ManagerTimesheetEntry() {
             {isWeekSubmitted && (
               <Badge
                 variant="secondary"
-                className="bg-blue-50 text-blue-700 border-blue-200"
+                className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
               >
                 🔒 Locked
               </Badge>
             )}
           </div>
           <p className="text-sm text-muted-foreground flex items-center gap-2">
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-gray-700 dark:text-gray-200">
               {format(weekStart, "MMM d")}
             </span>
             <ChevronRight className="w-3 h-3" />
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-gray-700 dark:text-gray-200">
               {format(weekEnd, "MMM d, yyyy")}
             </span>
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center bg-gray-100 dark:bg-zinc-800 rounded-lg p-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectedDay(addDays(selectedDay, -7))}
-              className="h-8 w-8 p-0 hover:bg-white rounded-md"
+              className="h-8 w-8 p-0 hover:bg-white dark:hover:bg-zinc-700 rounded-md"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -1024,7 +1028,7 @@ export function ManagerTimesheetEntry() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedDay(new Date())}
-              className="h-8 px-3 text-xs font-medium hover:bg-white rounded-md"
+              className="h-8 px-3 text-xs font-medium hover:bg-white dark:hover:bg-zinc-700 rounded-md"
             >
               Today
             </Button>
@@ -1032,7 +1036,7 @@ export function ManagerTimesheetEntry() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedDay(addDays(selectedDay, 7))}
-              className="h-8 w-8 p-0 hover:bg-white rounded-md"
+              className="h-8 w-8 p-0 hover:bg-white dark:hover:bg-zinc-700 rounded-md"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -1046,10 +1050,10 @@ export function ManagerTimesheetEntry() {
             <Plus className="h-4 w-4" /> Add Entry
           </Button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Day Selector */}
-      <div className="flex overflow-x-auto p-1 gap-2 no-scrollbar ">
+      {/* Days Tabs Navigation */}
+      <motion.div variants={item} className="flex overflow-x-auto p-1 gap-2 no-scrollbar ">
         {weekDates.map((d) => {
           const isSelected = isSameDay(d, selectedDay);
           const isToday = isSameDay(d, new Date());
@@ -1066,8 +1070,8 @@ export function ManagerTimesheetEntry() {
                 flex flex-col items-center justify-center gap-1
                 ${
                   isSelected
-                    ? "bg-blue-50 border-blue-200 ring-1 ring-blue-400"
-                    : "bg-white border-gray-300 hover:border-gray-300 hover:bg-gray-100"
+                    ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 ring-1 ring-blue-400"
+                    : "bg-white dark:bg-card border-gray-300 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800"
                 }`}
             >
               <span
@@ -1079,7 +1083,7 @@ export function ManagerTimesheetEntry() {
               </span>
               <span
                 className={`text-lg font-bold ${
-                  isSelected ? "text-blue-700" : "text-gray-700"
+                  isSelected ? "text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-200"
                 }`}
               >
                 {format(d, "d")}
@@ -1101,17 +1105,18 @@ export function ManagerTimesheetEntry() {
 
               {/* Missing Entry */}
               {dayMinutes === 0 && !isFutureDate(d) && (
-                <span className="text-[13px] text-gray-400">No entry</span>
+                <span className="text-[13px] text-gray-400 dark:text-gray-500">No entry</span>
               )}
             </button>
           );
         })}
-      </div>
+      </motion.div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Entries List */}
-        <Card className="lg:col-span-2 border-0 shadow-sm ring-1 ring-gray-200">
+        <motion.div variants={item} className="lg:col-span-2">
+        <Card className="border-none shadow-soft bg-white dark:bg-card">
           <CardHeader className="pb-3 border-b">
             <CardTitle className="text-lg flex items-center justify-between">
               <span>Entries for {format(selectedDay, "EEEE, MMM d")}</span>
@@ -1132,7 +1137,7 @@ export function ManagerTimesheetEntry() {
                 Loading entries...
               </div>
             ) : entriesForSelectedDay.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center text-gray-400">
+              <div className="p-12 text-center flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                 <button
                   type="button"
                   onClick={
@@ -1144,7 +1149,7 @@ export function ManagerTimesheetEntry() {
                   className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors
                     ${
                       isFutureDate(selectedDay) || isWeekSubmitted
-                        ? "bg-gray-100 text-gray-300 cursor-not-allowed opacity-50"
+                        ? "bg-gray-100 dark:bg-zinc-800 text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
                         : "bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300"
                     }
                   `}
@@ -1187,7 +1192,7 @@ export function ManagerTimesheetEntry() {
                   return (
                     <div
                       key={entry.entry_id}
-                      className="p-4 hover:bg-gray-50 transition-colors flex items-start gap-4 group"
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors flex items-start gap-4 group"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -1199,7 +1204,7 @@ export function ManagerTimesheetEntry() {
                             {entry.ticket_name || "Untitled Ticket"}
                           </span>
                           <span className="text-xs text-gray-400">•</span>
-                          <span className="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-full font-medium">
+                          <span className="text-xs px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-medium">
                             {entry.task_name || "No Task"}
                           </span>
                         </div>
@@ -1211,7 +1216,7 @@ export function ManagerTimesheetEntry() {
 
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           {entry.ticket_number && (
-                            <span className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs text-gray-600 font-mono">
+                            <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded border border-gray-200 dark:border-zinc-800 text-xs text-gray-600 font-mono">
                               {entry.ticket_number}
                             </span>
                           )}
@@ -1241,7 +1246,7 @@ export function ManagerTimesheetEntry() {
                       </div>
 
                       <div className="text-right flex flex-col items-end gap-2">
-                        <span className="text-lg font-bold text-gray-700 tabular-nums">
+                        <span className="text-lg font-bold text-gray-700 dark:text-gray-200 tabular-nums">
                           {formatMinutesDisplay(Number(entry.total_hours))}
                         </span>
                         {[
@@ -1276,9 +1281,10 @@ export function ManagerTimesheetEntry() {
             )}
           </CardContent>
         </Card>
+        </motion.div>
 
-        {/* Statistics Badges - Modern Dashboard Style */}
-        <div className="space-y-4">
+        {/* Right Panel: Calendar */}
+        <motion.div variants={item} className="lg:col-span-1">
           {/* Statistics Badges Row */}
           <div className="grid grid-cols-2 gap-3">
             {/* Total Hours Badge */}
@@ -1427,7 +1433,7 @@ export function ManagerTimesheetEntry() {
                 ? "Resubmit Rejected Entries"
                 : "Submit Week"}{" "}
           </Button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Confirm Dialog */}
@@ -1487,7 +1493,7 @@ export function ManagerTimesheetEntry() {
                 />
 
                 {showProjectList && (
-                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border rounded-md shadow-md max-h-60 overflow-y-auto">
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-card border rounded-md shadow-md max-h-60 overflow-y-auto">
                     {filteredProjects.length === 0 ? (
                       <div className="p-2 text-sm text-muted-foreground">
                         No project found
@@ -1496,7 +1502,7 @@ export function ManagerTimesheetEntry() {
                       filteredProjects.map((p) => (
                         <div
                           key={p.project_id}
-                          className={`p-2 text-sm cursor-pointer hover:bg-gray-100 ${
+                          className={`p-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 ${
                             form.projectId === p.project_id
                               ? "bg-gray-200 font-medium"
                               : ""
@@ -1540,7 +1546,7 @@ export function ManagerTimesheetEntry() {
                 />
 
                 {showTicketList && form.projectId && (
-                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border rounded-md shadow-md max-h-60 overflow-y-auto">
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-card border rounded-md shadow-md max-h-60 overflow-y-auto">
                     {filteredTickets.length === 0 ? (
                       <div className="p-2 text-sm text-muted-foreground">
                         No ticket found
@@ -1549,7 +1555,7 @@ export function ManagerTimesheetEntry() {
                       filteredTickets.map((t) => (
                         <div
                           key={t.ticket_id}
-                          className={`p-2 text-sm cursor-pointer hover:bg-gray-100 ${
+                          className={`p-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 ${
                             form.ticketId === t.ticket_id
                               ? "bg-gray-200 font-medium"
                               : ""
@@ -1591,7 +1597,7 @@ export function ManagerTimesheetEntry() {
                 />
 
                 {showTaskList && form.projectId && (
-                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border rounded-md shadow-md max-h-60 overflow-y-auto">
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white dark:bg-card border rounded-md shadow-md max-h-60 overflow-y-auto">
                     {filteredTasks.length === 0 ? (
                       <div className="p-2 text-sm text-muted-foreground">
                         No task found
@@ -1600,7 +1606,7 @@ export function ManagerTimesheetEntry() {
                       filteredTasks.map((t) => (
                         <div
                           key={t.task_id}
-                          className={`p-2 text-sm cursor-pointer hover:bg-gray-100 ${
+                          className={`p-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 ${
                             form.taskId === t.task_id
                               ? "bg-gray-200 font-medium"
                               : ""
@@ -1674,7 +1680,7 @@ export function ManagerTimesheetEntry() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
 

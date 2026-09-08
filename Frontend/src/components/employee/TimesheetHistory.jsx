@@ -35,6 +35,7 @@ import {
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import api from "../../services/api";
+import { motion } from "framer-motion";
 
 import { TimesheetDetailsDialog } from "../ui/TimesheetDetailsDialog";
 import { minutesToHHMM } from "../../utils/timeUtils";
@@ -93,6 +94,9 @@ function getStatusBadge(overall) {
       );
   }
 }
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
 
 export function TimesheetHistory() {
   const [timesheets, setTimesheets] = useState([]);
@@ -237,18 +241,19 @@ export function TimesheetHistory() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Timesheet History
         </h1>
         <p className="text-muted-foreground">
           View and manage your past timesheet submissions
         </p>
-      </div>
+      </motion.div>
 
       {/* ── Filters ────────────────────────────────────────────────────────── */}
-      <Card>
+      <motion.div variants={item}>
+      <Card className="border-none shadow-soft bg-white dark:bg-card">
         <CardHeader>
           <CardTitle>Filters</CardTitle>
         </CardHeader>
@@ -284,9 +289,11 @@ export function TimesheetHistory() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* ── Table ──────────────────────────────────────────────────────────── */}
-      <Card>
+      <motion.div variants={item}>
+      <Card className="border-none shadow-soft bg-white dark:bg-card">
         <CardHeader>
           <CardTitle>Timesheet Records</CardTitle>
           <CardDescription>
@@ -343,7 +350,8 @@ export function TimesheetHistory() {
           </Table>
         </CardContent>
       </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

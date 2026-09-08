@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -342,13 +343,17 @@ export function TimesheetApproval() {
       status.includes("Approved") ||
       status.includes("Rejected"));
 
+  const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+  const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+
   return (
-    <div className="space-y-4">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
       {/* ── Filters ────────────────────────────────────────────────────────── */}
-      <Card>
+      <motion.div variants={item}>
+      <Card className="border-none shadow-soft bg-white dark:bg-card">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Filter className="h-4 w-4" />
+          <CardTitle className="flex items-center gap-2 text-2xl font-bold tracking-tight">
+            <Filter className="h-5 w-5" />
             Pending Approvals
           </CardTitle>
         </CardHeader>
@@ -464,9 +469,11 @@ export function TimesheetApproval() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* ── Table ──────────────────────────────────────────────────────────── */}
-      <Card>
+      <motion.div variants={item}>
+      <Card className="border-none shadow-soft bg-white dark:bg-card">
         <CardContent className="p-0">
           <div className="rounded-md border overflow-x-auto">
             <Table>
@@ -771,6 +778,7 @@ export function TimesheetApproval() {
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
       />
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

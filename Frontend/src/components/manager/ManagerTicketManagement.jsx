@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -578,12 +579,15 @@ export function ManagerTicketManagement() {
     );
   };
 
+  const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+  const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+
   return (
-    <div className="space-y-6">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Ticket Management</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Ticket Management</h1>
           <p className="text-muted-foreground">
             Create, edit, and manage tickets under projects
           </p>
@@ -615,11 +619,12 @@ export function ManagerTicketManagement() {
             <Plus className="h-4 w-4 mr-2" /> Add Ticket
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* ─── MY PENDING HOURS REQUESTS ───────────────────────── */}
       {myRequests.length > 0 && (
-        <Card>
+        <motion.div variants={item}>
+        <Card className="border-none shadow-soft bg-white dark:bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Clock className="h-4 w-4 text-yellow-500" />
@@ -689,10 +694,12 @@ export function ManagerTicketManagement() {
             </div>
           </CardContent>
         </Card>
+        </motion.div>
       )}
 
       {/* Filters */}
-      <Card>
+      <motion.div variants={item}>
+      <Card className="border-none shadow-soft bg-white dark:bg-card">
         <CardContent className="pt-6">
           <div className="flex gap-4 items-center flex-wrap">
             <div className="flex-1 min-w-[200px] relative">
@@ -743,9 +750,11 @@ export function ManagerTicketManagement() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Tickets Table */}
-      <Card>
+      <motion.div variants={item}>
+      <Card className="border-none shadow-soft bg-white dark:bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Tickets ({filteredTickets.length})
@@ -1244,7 +1253,8 @@ export function ManagerTicketManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

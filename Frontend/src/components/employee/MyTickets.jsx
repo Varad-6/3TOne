@@ -19,6 +19,7 @@ import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Label } from "../../components/ui/label";
 import { Alert, AlertDescription } from "../../components/ui/alert";
+import { motion } from "framer-motion";
 // import {
 //   Dialog,
 //   DialogContent,
@@ -43,6 +44,9 @@ import ViewTicketDialog from "../ui/viewTicketDialog";
 // ============================================
 // MAIN COMPONENT
 // ============================================
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
 
 export default function MyTickets() {
   const { user } = useAuth();
@@ -132,14 +136,15 @@ export default function MyTickets() {
     );
   }
   return (
-    <div className="space-y-6">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{getPageTitle()}</h1>
-      </div>
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-2xl font-bold tracking-tight">{getPageTitle()}</h1>
+      </motion.div>
 
       {/* Main Card */}
-      <Card>
+      <motion.div variants={item}>
+      <Card className="border-none shadow-soft bg-white dark:bg-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -317,6 +322,7 @@ export default function MyTickets() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

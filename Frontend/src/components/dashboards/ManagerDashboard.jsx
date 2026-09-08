@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import timesheetService from "../../services/timesheetService";
 import { format } from "date-fns";
 import { minutesToHHMM, hhmmToMinutes } from "../../utils/timeUtils";
+import { motion } from "framer-motion";
 
 export const ManagerDashboard = () => {
   const navigate = useNavigate();
@@ -93,29 +94,37 @@ export const ManagerDashboard = () => {
       label: "Team Members",
       value: stats.teamMembers,
       icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      color: "text-indigo-600 dark:text-indigo-400",
+      bgColor: "bg-indigo-100 dark:bg-indigo-900/40",
+      gradient: "from-indigo-50 to-white dark:from-indigo-950/20 dark:to-zinc-900",
+      titleColor: "text-indigo-700 dark:text-indigo-300"
     },
     {
       label: "Pending Approvals",
       value: stats.pendingApprovals,
       icon: Clock,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
+      color: "text-amber-600 dark:text-amber-400",
+      bgColor: "bg-amber-100 dark:bg-amber-900/40",
+      gradient: "from-amber-50 to-white dark:from-amber-950/20 dark:to-zinc-900",
+      titleColor: "text-amber-700 dark:text-amber-300"
     },
     {
       label: "Approved This Week",
       value: stats.approvedThisWeek,
       icon: CheckCircle,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
+      color: "text-emerald-600 dark:text-emerald-400",
+      bgColor: "bg-emerald-100 dark:bg-emerald-900/40",
+      gradient: "from-emerald-50 to-white dark:from-emerald-950/20 dark:to-zinc-900",
+      titleColor: "text-emerald-700 dark:text-emerald-300"
     },
     {
       label: "Team Hours This Week",
       value: minutesToHHMM(stats.teamHoursThisWeek),
       icon: Clock,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-100 dark:bg-blue-900/40",
+      gradient: "from-blue-50 to-white dark:from-blue-950/20 dark:to-zinc-900",
+      titleColor: "text-blue-700 dark:text-blue-300"
     },
   ];
 
@@ -165,34 +174,38 @@ export const ManagerDashboard = () => {
     );
   }
 
+  const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
+  const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } } };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Manager Dashboard</h1>
-        <p className="text-muted-foreground">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <h1 className="text-2xl font-bold tracking-tight">Manager Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Monitor your team's timesheet submissions and progress
         </p>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsArray.map((stat) => (
-          <Card
-            key={stat.label}
-            className="flex flex-col justify-between hover:shadow-md transition-shadow"
-          >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.label}
-              </CardTitle>
-              <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
+          <motion.div variants={item} key={stat.label}>
+            <Card
+              className={`flex flex-col justify-between hover:shadow-md transition-shadow border-none shadow-sm bg-gradient-to-br ${stat.gradient}`}
+            >
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className={`text-sm font-semibold ${stat.titleColor}`}>
+                  {stat.label}
+                </CardTitle>
+                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
@@ -349,7 +362,7 @@ export const ManagerDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

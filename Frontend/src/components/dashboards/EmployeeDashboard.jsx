@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import dashboardService from "../../services/dashboardService";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export function EmployeeDashboard() {
   const [loading, setLoading] = useState(true);
@@ -56,85 +57,96 @@ export function EmployeeDashboard() {
 
   const weeklyProgress = (stats.weeklyHours / 40) * 100;
 
+  const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
+  const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } } };
+
   return (
-    <div className="space-y-6">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Employee Dashboard</h1>
-        <p className="text-muted-foreground">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <h1 className="text-2xl font-bold tracking-tight">Employee Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Track your timesheet submissions and work hours
         </p>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Weekly Hours */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Weekly Hours</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.weeklyHours} hrs</div>
-            <p className="text-xs text-muted-foreground">
-              {weeklyProgress.toFixed(0)}% of 40 hours target
-            </p>
-            <div className="mt-2 h-2 w-full bg-secondary rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary transition-all"
-                style={{ width: `${Math.min(weeklyProgress, 100)}%` }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div variants={item}>
+          <Card className="border-none shadow-sm bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-zinc-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-blue-700 dark:text-blue-300 text-sm font-semibold">Weekly Hours</CardTitle>
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg"><Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" /></div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.weeklyHours} hrs</div>
+              <p className="text-xs text-muted-foreground">
+                {weeklyProgress.toFixed(0)}% of 40 hours target
+              </p>
+              <div className="mt-2 h-2 w-full bg-secondary rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all"
+                  style={{ width: `${Math.min(weeklyProgress, 100)}%` }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Pending Timesheets */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Approval
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingTimesheets}</div>
-            <p className="text-xs text-muted-foreground">
-              Waiting for approval
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div variants={item}>
+          <Card className="border-none shadow-sm bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-zinc-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-amber-700 dark:text-amber-300 text-sm font-semibold">
+                Pending Approval
+              </CardTitle>
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-lg"><AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" /></div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.pendingTimesheets}</div>
+              <p className="text-xs text-muted-foreground">
+                Waiting for approval
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Approved Timesheets */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Approved (This Month)
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.approvedTimesheets}</div>
-            <p className="text-xs text-muted-foreground">
-              Timesheets approved
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div variants={item}>
+          <Card className="border-none shadow-sm bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-zinc-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-emerald-700 dark:text-emerald-300 text-sm font-semibold">
+                Approved (This Month)
+              </CardTitle>
+              <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg"><CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /></div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.approvedTimesheets}</div>
+              <p className="text-xs text-muted-foreground">
+                Timesheets approved
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Rejected Timesheets */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Rejected (This Month)
-            </CardTitle>
-            <XCircle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.rejectedTimesheets}
-            </div>
-            <p className="text-xs text-muted-foreground">Need attention</p>
-          </CardContent>
-        </Card>
+        <motion.div variants={item}>
+          <Card className="border-none shadow-sm bg-gradient-to-br from-red-50 to-white dark:from-red-950/20 dark:to-zinc-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-red-700 dark:text-red-300 text-sm font-semibold">
+                Rejected (This Month)
+              </CardTitle>
+              <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-lg"><XCircle className="h-4 w-4 text-red-600 dark:text-red-400" /></div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {stats.rejectedTimesheets}
+              </div>
+              <p className="text-xs text-muted-foreground">Need attention</p>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Quick Actions */}
@@ -146,12 +158,12 @@ export function EmployeeDashboard() {
         <CardContent className="grid gap-4 md:grid-cols-2">
           <Link
             to="/employee/timesheet"
-            className="flex items-center gap-4 p-4 border rounded-lg hover:bg-accent transition-colors"
+            className="flex items-center gap-4 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:bg-primary/5 hover:border-primary/20 transition-all duration-200 group"
           >
-            <Clock className="h-8 w-8 text-primary" />
+            <Clock className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
             <div>
-              <h3 className="font-semibold">Log Hours</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-sm">Log Hours</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Add timesheet entries for this week
               </p>
             </div>
@@ -159,12 +171,12 @@ export function EmployeeDashboard() {
 
           <Link
             to="/employee/history"
-            className="flex items-center gap-4 p-4 border rounded-lg hover:bg-accent transition-colors"
+            className="flex items-center gap-4 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:bg-primary/5 hover:border-primary/20 transition-all duration-200 group"
           >
-            <CheckCircle className="h-8 w-8 text-primary" />
+            <CheckCircle className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
             <div>
-              <h3 className="font-semibold">View History</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-sm">View History</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 See all submitted timesheets
               </p>
             </div>
@@ -190,6 +202,6 @@ export function EmployeeDashboard() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </motion.div>
   );
 }

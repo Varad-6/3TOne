@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import Lenis from "lenis";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../context/ThemeContext";
 import { Button } from "./ui/button";
@@ -32,6 +34,31 @@ export const Layout = ({ children }) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const wrapper = document.querySelector('.main-scroll-area');
+    if (!wrapper) return;
+
+    const lenis = new Lenis({
+      wrapper,
+      content: wrapper.firstElementChild || wrapper,
+      lerp: 0.08,
+      duration: 1.2,
+      smoothWheel: true,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    const rafId = requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -143,7 +170,7 @@ export const Layout = ({ children }) => {
   const currentNav = user ? navigation[user.role] || [] : [];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-zinc-100 dark:bg-[#09090b]">
+    <div className="flex h-screen w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950">
       {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div 
@@ -156,7 +183,7 @@ export const Layout = ({ children }) => {
       <aside
         className={`fixed top-0 left-0 z-40 h-screen transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } bg-zinc-100 dark:bg-[#09090b] border-none w-64 flex flex-col`}
+        } bg-white/80 backdrop-blur-xl border-r border-zinc-200/60 dark:bg-zinc-950/90 dark:backdrop-blur-xl dark:border-zinc-800/40 w-64 flex flex-col`}
       >
         {/* Logo Section */}
         <div className="flex items-center gap-3 px-6 pt-8 pb-6">
@@ -182,27 +209,33 @@ export const Layout = ({ children }) => {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {currentNav.map((item) => {
+          {currentNav.map((item, index) => {
             const isActive = location.pathname === item.href;
             return (
-              <Link
+              <motion.div
                 key={item.name}
-                to={item.href}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 active:scale-[0.98] ${
-                  isActive
-                    ? "bg-primary text-white shadow-soft"
-                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100"
-                }`}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.04, duration: 0.25, ease: 'easeOut' }}
               >
-                <item.icon className="w-5 h-5 mr-3" />
-                {item.name}
-              </Link>
+                <Link
+                  to={item.href}
+                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 active:scale-[0.98] ${
+                    isActive
+                      ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary font-semibold border-l-2 border-primary"
+                      : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  }`}
+                >
+                  <item.icon className="w-5 h-5 mr-3" />
+                  {item.name}
+                </Link>
+              </motion.div>
             );
           })}
         </nav>
 
         {/* User Section with Dropdown */}
-        <div className="p-4 relative mt-auto">
+        <div className="p-4 relative mt-auto border-t border-zinc-100 dark:border-zinc-800/60 pt-2">
           {/* Dropdown Menu */}
           {userMenuOpen && (
             <div
@@ -302,10 +335,16 @@ export const Layout = ({ children }) => {
           </Button>
 
           <div className="flex-1 px-4">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-foreground">
+            <motion.h2
+              key={location.pathname}
+              initial={{ opacity: 0, x: -4 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-base font-semibold text-foreground"
+            >
               {currentNav.find((item) => item.href === location.pathname)
                 ?.name || "Dashboard"}
-            </h2>
+            </motion.h2>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -326,8 +365,19 @@ export const Layout = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 min-w-0 p-6 overflow-x-hidden overflow-y-auto">
-          {children}
+        <main className="flex-1 min-w-0 p-6 overflow-x-hidden overflow-y-auto main-scroll-area">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
         </div>
       </div>

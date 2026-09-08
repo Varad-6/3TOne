@@ -685,14 +685,14 @@
 //   const StatusBadge = ({ status }) => {
 //     const statusName = getStatusName(status);
 
-//     let color = "bg-gray-100 text-gray-700 border-gray-200";
+//     let color = "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-zinc-800";
 //     let icon = <Clock className="w-3 h-3 mr-1" />;
 
 //     if (statusName === "Submitted") {
 //       color = "bg-yellow-50 text-yellow-700 border-yellow-200";
 //       icon = <AlertCircle className="w-3 h-3 mr-1" />;
 //     } else if (statusName === "Partially_Approved") {
-//       color = "bg-blue-50 text-blue-700 border-blue-200";
+//       color = "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800";
 //       icon = <Clock className="w-3 h-3 mr-1" />;
 //     } else if (statusName.includes("Approved")) {
 //       color = "bg-green-50 text-green-700 border-green-200";
@@ -748,23 +748,23 @@
 //             </Badge>
 //           </div>
 //           <p className="text-sm text-muted-foreground flex items-center gap-2">
-//             <span className="font-medium text-gray-700">
+//             <span className="font-medium text-gray-700 dark:text-gray-200">
 //               {format(weekStart, "MMM d")}
 //             </span>
 //             <ChevronRight className="w-3 h-3" />
-//             <span className="font-medium text-gray-700">
+//             <span className="font-medium text-gray-700 dark:text-gray-200">
 //               {format(weekEnd, "MMM d, yyyy")}
 //             </span>
 //           </p>
 //         </div>
 
 //         <div className="flex items-center gap-3">
-//           <div className="flex items-center bg-gray-100 rounded-lg p-1">
+//           <div className="flex items-center bg-gray-100 dark:bg-zinc-800 rounded-lg p-1">
 //             <Button
 //               variant="ghost"
 //               size="sm"
 //               onClick={() => setSelectedDay(addDays(selectedDay, -7))}
-//               className="h-8 w-8 p-0 hover:bg-white rounded-md"
+//               className="h-8 w-8 p-0 hover:bg-white dark:hover:bg-zinc-700 rounded-md"
 //             >
 //               <ChevronLeft className="h-4 w-4" />
 //             </Button>
@@ -778,7 +778,7 @@
 //               variant="ghost"
 //               size="sm"
 //               onClick={() => setSelectedDay(new Date())}
-//               className="h-8 px-3 text-xs font-medium hover:bg-white rounded-md"
+//               className="h-8 px-3 text-xs font-medium hover:bg-white dark:hover:bg-zinc-700 rounded-md"
 //             >
 //               Today
 //             </Button>
@@ -786,7 +786,7 @@
 //               variant="ghost"
 //               size="sm"
 //               onClick={() => setSelectedDay(addDays(selectedDay, 7))}
-//               className="h-8 w-8 p-0 hover:bg-white rounded-md"
+//               className="h-8 w-8 p-0 hover:bg-white dark:hover:bg-zinc-700 rounded-md"
 //             >
 //               <ChevronRight className="h-4 w-4" />
 //             </Button>
@@ -821,8 +821,8 @@
 //                 flex flex-col items-center justify-center gap-1
 //                 ${
 //                   isSelected
-//                     ? "bg-blue-50 border-blue-200 ring-1 ring-blue-200"
-//                     : "bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+//                     ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 ring-1 ring-blue-200"
+//                     : "bg-white dark:bg-card border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800"
 //                 }
 //               `}
 //             >
@@ -835,13 +835,13 @@
 //               </span>
 //               <span
 //                 className={`text-lg font-bold ${
-//                   isSelected ? "text-blue-700" : "text-gray-700"
+//                   isSelected ? "text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-200"
 //                 }`}
 //               >
 //                 {format(d, "d")}
 //               </span>
 //               {dayHours > 0 && (
-//                 <span className="text-[10px] font-medium px-1.5 py-0.5 bg-gray-100 rounded-full text-gray-600 mt-1">
+//                 <span className="text-[10px] font-medium px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded-full text-gray-600 dark:text-gray-300 mt-1">
 //                   {minutesToHHMM(dayHours)}
 //                 </span>
 //               )}
@@ -872,7 +872,7 @@
 //                 Loading entries...
 //               </div>
 //             ) : entriesForSelectedDay.length === 0 ? (
-//               <div className="p-12 text-center flex flex-col items-center justify-center text-gray-400">
+//               <div className="p-12 text-center flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
 //                 <button
 //                   type="button"
 //                   onClick={!future ? openAddDialog : undefined}
@@ -886,7 +886,7 @@
 //                   className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors
 //                     ${
 //                       future
-//                         ? "bg-gray-100 text-gray-300 cursor-not-allowed opacity-50"
+//                         ? "bg-gray-100 dark:bg-zinc-800 text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
 //                         : "bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300"
 //                     }
 //                   `}
@@ -911,19 +911,19 @@
 //                   return (
 //                     <div
 //                       key={entry.entry_id}
-//                       className="p-4 hover:bg-gray-50 transition-colors flex items-start gap-4 group"
+//                       className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors flex items-start gap-4 group"
 //                     >
 //                       <div className="flex-1 min-w-0">
 //                         <div className="flex items-center gap-2 mb-1">
-//                           <h4 className="font-medium text-gray-900 truncate">
+//                           <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
 //                             {entry.project_name}
 //                           </h4>
-//                           <span className="text-xs text-gray-400">•</span>
-//                           <span className="text-sm text-gray-600 truncate">
+//                           <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+//                           <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
 //                             {entry.ticket_name || "Untitled Ticket"}
 //                           </span>
-//                           <span className="text-xs text-gray-400">•</span>
-//                           <span className="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-full font-medium">
+//                           <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+//                           <span className="text-xs px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-medium">
 //                             {entry.task_name || "No Task"}
 //                           </span>
 //                         </div>
@@ -935,7 +935,7 @@
 
 //                         <div className="flex flex-wrap items-center gap-2 mt-2">
 //                           {entry.ticket_number && (
-//                             <span className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs text-gray-600 font-mono">
+//                             <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded border border-gray-200 dark:border-zinc-800 text-xs text-gray-600 dark:text-gray-300 font-mono">
 //                               {entry.ticket_number}
 //                             </span>
 //                           )}
@@ -964,7 +964,7 @@
 //                       </div>
 
 //                       <div className="text-right flex flex-col items-end gap-2">
-//                         <span className="text-lg font-bold text-gray-700 tabular-nums">
+//                         <span className="text-lg font-bold text-gray-700 dark:text-gray-200 tabular-nums">
 //                           {minutesToHHMM(entry.hours_logged)}
 //                         </span>
 //                         {[
@@ -1011,7 +1011,7 @@
 //                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
 //                     Total Hours
 //                   </span>
-//                   <span className="text-2xl font-bold text-gray-900">
+//                   <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 //                     {minutesToHHMM(weekTotalMinutes)}
 //                   </span>
 //                   {/* <span className="text-xs text-gray-500 mt-1">
@@ -1028,7 +1028,7 @@
 //                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
 //                     Days Logged
 //                   </span>
-//                   <span className="text-2xl font-bold text-gray-900">
+//                   <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 //                     {new Set(entries.map((e) => e.entry_date)).size} / 7
 //                   </span>
 //                   <span className="text-xs text-gray-500 mt-1">
@@ -1046,7 +1046,7 @@
 //                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
 //                     Billable
 //                   </span>
-//                   <span className="text-2xl font-bold text-gray-900">
+//                   <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 //                     {weekTotalMinutes > 0
 //                       ? Math.round(
 //                           (weeklyBillableMinutes / weekTotalMinutes) * 100,
@@ -1108,20 +1108,20 @@
 //             <CardContent className="p-4">
 //               <div className="space-y-3">
 //                 <div className="flex items-center justify-between text-sm">
-//                   <span className="text-gray-600 flex items-center gap-2">
+//                   <span className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
 //                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
 //                     Billable Hours
 //                   </span>
-//                   <span className="font-semibold text-gray-900">
+//                   <span className="font-semibold text-gray-900 dark:text-gray-100">
 //                     {minutesToHHMM(weeklyBillableMinutes)}
 //                   </span>
 //                 </div>
 //                 <div className="flex items-center justify-between text-sm">
-//                   <span className="text-gray-600 flex items-center gap-2">
+//                   <span className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
 //                     <span className="w-2 h-2 rounded-full bg-orange-500"></span>
 //                     Non-Billable Hours
 //                   </span>
-//                   <span className="font-semibold text-gray-900">
+//                   <span className="font-semibold text-gray-900 dark:text-gray-100">
 //                     {minutesToHHMM(weeklyNonBillableMinutes)}
 //                   </span>
 //                 </div>
@@ -1375,6 +1375,7 @@ import ticketService from "../../services/ticketService";
 import taskService from "../../services/taskService";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
 import { TimesheetCalendar } from "../ui/TimesheetCalendar";
+import { motion } from "framer-motion";
 
 // ============================================
 // MINUTES-BASED TIME UTILITIES
@@ -1475,6 +1476,9 @@ const isFutureDate = (date) => toIso(date) > toIso(new Date());
 // ============================================
 // MAIN COMPONENT
 // ============================================
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
 
 export function EmployeeTimesheetEntry() {
   const [projects, setProjects] = useState([]);
@@ -1988,13 +1992,13 @@ export function EmployeeTimesheetEntry() {
 
   const StatusBadge = ({ status }) => {
     const statusName = getStatusName(status);
-    let color = "bg-gray-100 text-gray-700 border-gray-200";
+    let color = "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-zinc-800";
     let icon = <Clock className="w-3 h-3 mr-1" />;
     if (statusName === "Submitted") {
       color = "bg-yellow-50 text-yellow-700 border-yellow-200";
       icon = <AlertCircle className="w-3 h-3 mr-1" />;
     } else if (statusName === "Partially_Approved") {
-      color = "bg-blue-50 text-blue-700 border-blue-200";
+      color = "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800";
       icon = <Clock className="w-3 h-3 mr-1" />;
     } else if (statusName.includes("Approved")) {
       color = "bg-green-50 text-green-700 border-green-200";
@@ -2015,14 +2019,15 @@ export function EmployeeTimesheetEntry() {
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6 p-1">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 p-1">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-lg border shadow-sm">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-lg border-none shadow-soft dark:bg-card">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-800 dark:text-gray-100">
               Weekly Timesheet
-            </h2>
+            </h1>
             <Badge
               variant={
                 weeklyStatus.includes("Rejected") ? "destructive" : "outline"
@@ -2034,30 +2039,30 @@ export function EmployeeTimesheetEntry() {
             {isWeekSubmitted && (
               <Badge
                 variant="secondary"
-                className="bg-blue-50 text-blue-700 border-blue-200"
+                className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
               >
                 🔒 Locked
               </Badge>
             )}
           </div>
           <p className="text-sm text-muted-foreground flex items-center gap-2">
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-gray-700 dark:text-gray-200">
               {format(weekStart, "MMM d")}
             </span>
             <ChevronRight className="w-3 h-3" />
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-gray-700 dark:text-gray-200">
               {format(weekEnd, "MMM d, yyyy")}
             </span>
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center bg-gray-100 dark:bg-zinc-800 rounded-lg p-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectedDay(addDays(selectedDay, -7))}
-              className="h-8 w-8 p-0 hover:bg-white rounded-md"
+              className="h-8 w-8 p-0 hover:bg-white dark:hover:bg-zinc-700 rounded-md"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -2071,7 +2076,7 @@ export function EmployeeTimesheetEntry() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedDay(new Date())}
-              className="h-8 px-3 text-xs font-medium hover:bg-white rounded-md"
+              className="h-8 px-3 text-xs font-medium hover:bg-white dark:hover:bg-zinc-700 rounded-md"
             >
               Today
             </Button>
@@ -2079,7 +2084,7 @@ export function EmployeeTimesheetEntry() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedDay(addDays(selectedDay, 7))}
-              className="h-8 w-8 p-0 hover:bg-white rounded-md"
+              className="h-8 w-8 p-0 hover:bg-white dark:hover:bg-zinc-700 rounded-md"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -2099,6 +2104,7 @@ export function EmployeeTimesheetEntry() {
           </Button>
         </div>
       </div>
+      </motion.div>
 
       {/* ── Day Selector ───────────────────────────────────────────────────── */}
       <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
@@ -2119,8 +2125,8 @@ export function EmployeeTimesheetEntry() {
                 flex flex-col items-center justify-center gap-1
                 ${
                   isSelected
-                    ? "bg-blue-50 border-blue-200 ring-1 ring-blue-200"
-                    : "bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                    ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 ring-1 ring-blue-200"
+                    : "bg-white dark:bg-card border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800"
                 }`}
             >
               <span
@@ -2128,24 +2134,24 @@ export function EmployeeTimesheetEntry() {
               >
                 {isToday ? "Today" : format(d, "EEE")}
                 {isSunday && (
-                  <span className="ml-1 text-[9px] text-gray-400 normal-case">
+                  <span className="ml-1 text-[9px] text-gray-400 dark:text-gray-500 normal-case">
                     (opt)
                   </span>
                 )}
               </span>
               <span
-                className={`text-lg font-bold ${isSelected ? "text-blue-700" : "text-gray-700"}`}
+                className={`text-lg font-bold ${isSelected ? "text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-200"}`}
               >
                 {format(d, "d")}
               </span>
               {dayMinutes > 0 && (
-                <span className="text-[10px] font-medium px-1.5 py-0.5 bg-gray-100 rounded-full text-gray-600 mt-1">
+                <span className="text-[10px] font-medium px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded-full text-gray-600 dark:text-gray-300 mt-1">
                   {minutesToHHMM(dayMinutes)}
                 </span>
               )}
               {dayMinutes === 0 && !isFutureDate(d) && (
                 <span
-                  className={`text-[10px] ${isSunday ? "text-gray-300" : "text-gray-400"}`}
+                  className={`text-[10px] ${isSunday ? "text-gray-300 dark:text-gray-600" : "text-gray-400 dark:text-gray-500"}`}
                 >
                   {isSunday ? "—" : "No entry"}
                 </span>
@@ -2158,7 +2164,8 @@ export function EmployeeTimesheetEntry() {
       {/* ── Main Grid ──────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Entries List */}
-        <Card className="lg:col-span-2 border-0 shadow-sm ring-1 ring-gray-200">
+        <motion.div variants={item} className="lg:col-span-2">
+        <Card className="border-none shadow-soft bg-white dark:bg-card">
           <CardHeader className="pb-3 border-b">
             <CardTitle className="text-lg flex items-center justify-between">
               <span>Entries for {format(selectedDay, "EEEE, MMM d")}</span>
@@ -2180,7 +2187,7 @@ export function EmployeeTimesheetEntry() {
                 Loading entries...
               </div>
             ) : entriesForSelectedDay.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center text-gray-400">
+              <div className="p-12 text-center flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                 {/*
                   ✅ FIX — empty-state + button: disabled when cannotAdd.
                   Previously only checked `future`; now also blocks when
@@ -2201,7 +2208,7 @@ export function EmployeeTimesheetEntry() {
                   className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors
                     ${
                       cannotAdd
-                        ? "bg-gray-100 text-gray-300 cursor-not-allowed opacity-50"
+                        ? "bg-gray-100 dark:bg-zinc-800 text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
                         : "bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300"
                     }`}
                 >
@@ -2240,19 +2247,19 @@ export function EmployeeTimesheetEntry() {
                   return (
                     <div
                       key={entry.entry_id}
-                      className="p-4 hover:bg-gray-50 transition-colors flex items-start gap-4 group"
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors flex items-start gap-4 group"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-gray-900 truncate">
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
                             {entry.project_name}
                           </h4>
-                          <span className="text-xs text-gray-400">•</span>
-                          <span className="text-sm text-gray-600 truncate">
+                          <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
                             {entry.ticket_name || "Untitled Ticket"}
                           </span>
-                          <span className="text-xs text-gray-400">•</span>
-                          <span className="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-full font-medium">
+                          <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+                          <span className="text-xs px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-medium">
                             {entry.task_name || "No Task"}
                           </span>
                         </div>
@@ -2265,7 +2272,7 @@ export function EmployeeTimesheetEntry() {
 
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           {entry.ticket_number && (
-                            <span className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-xs text-gray-600 font-mono">
+                            <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded border border-gray-200 dark:border-zinc-800 text-xs text-gray-600 dark:text-gray-300 font-mono">
                               {entry.ticket_number}
                             </span>
                           )}
@@ -2293,7 +2300,7 @@ export function EmployeeTimesheetEntry() {
                       </div>
 
                       <div className="text-right flex flex-col items-end gap-2">
-                        <span className="text-lg font-bold text-gray-700 tabular-nums">
+                        <span className="text-lg font-bold text-gray-700 dark:text-gray-200 tabular-nums">
                           {minutesToHHMM(entry.hours_logged)}
                         </span>
                         {[
@@ -2328,31 +2335,35 @@ export function EmployeeTimesheetEntry() {
             )}
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Stats Panel */}
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <Card className="border-0 shadow-sm ring-1 ring-gray-200 bg-gradient-to-br from-blue-50 to-white">
+            <motion.div variants={item}>
+            <Card className="border-none shadow-soft bg-white dark:bg-card">
               <CardContent className="p-4">
                 <div className="flex flex-col">
                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Total Hours
                   </span>
-                  <span className="text-2xl font-bold text-gray-900">
+                  <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {minutesToHHMM(weekTotalMinutes)}
                   </span>
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
 
             {/* ✅ FIX: count Mon–Sat only (/6), remaining from 6 not 7 */}
-            <Card className="border-0 shadow-sm ring-1 ring-gray-200 bg-gradient-to-br from-green-50 to-white">
+            <motion.div variants={item}>
+            <Card className="border-none shadow-soft bg-white dark:bg-card">
               <CardContent className="p-4">
                 <div className="flex flex-col">
                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Days Logged
                   </span>
-                  <span className="text-2xl font-bold text-gray-900">
+                  <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {loggedDays}{" "}
                     <span className="text-base font-normal text-gray-400">
                       / 6
@@ -2364,14 +2375,16 @@ export function EmployeeTimesheetEntry() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
 
-            <Card className="border-0 shadow-sm ring-1 ring-gray-200 bg-gradient-to-br from-purple-50 to-white">
+            <motion.div variants={item}>
+            <Card className="border-none shadow-soft bg-white dark:bg-card">
               <CardContent className="p-4">
                 <div className="flex flex-col">
                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Billable
                   </span>
-                  <span className="text-2xl font-bold text-gray-900">
+                  <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {weekTotalMinutes > 0
                       ? Math.round(
                           (weeklyBillableMinutes / weekTotalMinutes) * 100,
@@ -2385,15 +2398,11 @@ export function EmployeeTimesheetEntry() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
 
+            <motion.div variants={item}>
             <Card
-              className={`border-0 shadow-sm ring-1 ring-gray-200 ${
-                isWeekValidForSubmit
-                  ? "bg-gradient-to-br from-green-50 to-white"
-                  : weeklyStatus.includes("Rejected")
-                    ? "bg-gradient-to-br from-red-50 to-white"
-                    : "bg-gradient-to-br from-orange-50 to-white"
-              }`}
+              className={`border-none shadow-soft bg-white dark:bg-card`}
             >
               <CardContent className="p-4">
                 <div className="flex flex-col">
@@ -2425,26 +2434,28 @@ export function EmployeeTimesheetEntry() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
           </div>
 
-          <Card className="border-0 shadow-sm ring-1 ring-gray-200">
+          <motion.div variants={item}>
+          <Card className="border-none shadow-soft bg-white dark:bg-card">
             <CardContent className="p-4">
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 flex items-center gap-2">
+                  <span className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
                     Billable Hours
                   </span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {minutesToHHMM(weeklyBillableMinutes)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 flex items-center gap-2">
+                  <span className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-orange-500"></span>
                     Non-Billable Hours
                   </span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {minutesToHHMM(weeklyNonBillableMinutes)}
                   </span>
                 </div>
@@ -2457,6 +2468,7 @@ export function EmployeeTimesheetEntry() {
               </div>
             </CardContent>
           </Card>
+          </motion.div>
 
           <Button
             className="w-full"
@@ -2637,7 +2649,7 @@ export function EmployeeTimesheetEntry() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
 
