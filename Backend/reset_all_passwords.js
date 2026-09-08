@@ -1,14 +1,5 @@
+import pool from './src/config/database.js';
 import bcrypt from 'bcrypt';
-import pg from 'pg';
-
-const { Pool } = pg;
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'timetrakpro',
-  password: 'PostgresAdmin@123',
-  port: 5432,
-});
 
 async function resetAllPasswords() {
   try {
