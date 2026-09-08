@@ -200,9 +200,10 @@ const STATUS_MAP = {
   2: "Submitted",
   3: "Manager_Approved",
   4: "Manager_Rejected",
-  5: "Admin_Approved",
-  6: "Admin_Rejected",
-  7: "Partially_Approved",
+  5: "Locked",
+  6: "Admin_Approved",
+  7: "Admin_Rejected",
+  8: "Partially_Approved",
 };
 
 function getStatusName(status) {
@@ -246,6 +247,14 @@ const isFutureDate = (date) => {
   const dateIso = toIso(date);
   return dateIso > todayIso;
 };
+
+const isPastDate = (date) => {
+  const todayIso = toIso(new Date());
+  const dateIso = toIso(date);
+  return dateIso < todayIso;
+};
+
+const isLockedDate = (date) => isFutureDate(date) || isPastDate(date);
 
 // ============================================
 // MAIN COMPONENT
@@ -495,11 +504,13 @@ export function ManagerTimesheetEntry() {
 
     const statusNames = entries.map((e) => getStatusName(e.status));
 
-    // Week is locked if ALL entries are not Draft or Rejected
+    // Week is locked if ALL entries are not Draft, Locked, or Rejected
     return statusNames.every(
-      (s) => !["Draft", "Manager_Rejected", "Admin_Rejected"].includes(s),
+      (s) => !["Draft", "Locked", "Saved", "Manager_Rejected", "Admin_Rejected"].includes(s),
     );
   }, [entries]);
+
+  const isLockedDay = isLockedDate(selectedDay);
 
   // Load tasks by manager department
   useEffect(() => {
@@ -666,6 +677,11 @@ export function ManagerTimesheetEntry() {
   const openEditDialog = async (entry) => {
     const statusName = getStatusName(entry.status);
 
+    if (isLockedDay || statusName === "Locked") {
+      toast.error("Timesheet entries for previous and future days are locked and cannot be edited.");
+      return;
+    }
+
     if (!["Draft", "Manager_Rejected", "Admin_Rejected"].includes(statusName)) {
       toast.error("Cannot edit entry pending approval or already approved.");
       return;
@@ -699,12 +715,16 @@ export function ManagerTimesheetEntry() {
     const { projectId, ticketId, taskId, hours, ticketNumber, description } =
       form;
 
-    // Validate future date
+    // Validate date locking
     const todayIso = toIso(new Date());
     const entryDateStr = toIso(selectedDay);
 
     if (entryDateStr > todayIso) {
       toast.error("You cannot add entries for future dates");
+      return;
+    }
+    if (entryDateStr < todayIso) {
+      toast.error("Timesheet entries for previous days are locked and cannot be added or modified");
       return;
     }
 
@@ -791,6 +811,11 @@ export function ManagerTimesheetEntry() {
   const handleDeleteEntry = async (entryId) => {
     const entry = entries.find((e) => e.entry_id === entryId);
     const statusName = getStatusName(entry?.status);
+
+    if (isLockedDay || statusName === "Locked") {
+      toast.error("Timesheet entries for previous and future days are locked and cannot be deleted.");
+      return;
+    }
 
     if (
       !entry ||
@@ -932,7 +957,10 @@ export function ManagerTimesheetEntry() {
     let color = "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-zinc-800";
     let icon = <Clock className="w-3 h-3 mr-1" />;
 
-    if (statusName === "Submitted" || statusName === "Pending_Admin") {
+    if (statusName === "Locked") {
+      color = "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-zinc-700";
+      icon = <Clock className="w-3 h-3 mr-1" />;
+    } else if (statusName === "Submitted" || statusName === "Pending_Admin") {
       color = "bg-yellow-50 text-yellow-700 border-yellow-200";
       icon = <AlertCircle className="w-3 h-3 mr-1" />;
     } else if (statusName.includes("Approved")) {
@@ -1045,7 +1073,7 @@ export function ManagerTimesheetEntry() {
           <Button
             onClick={openAddDialog}
             className="gap-2 shadow-sm"
-            disabled={isFutureDate(selectedDay) || isWeekSubmitted}
+            disabled={isLockedDay || isWeekSubmitted}
           >
             <Plus className="h-4 w-4" /> Add Entry
           </Button>
@@ -1141,14 +1169,14 @@ export function ManagerTimesheetEntry() {
                 <button
                   type="button"
                   onClick={
-                    !isFutureDate(selectedDay) && !isWeekSubmitted
+                    !isLockedDay && !isWeekSubmitted
                       ? openAddDialog
                       : undefined
                   }
-                  disabled={isFutureDate(selectedDay) || isWeekSubmitted}
+                  disabled={isLockedDay || isWeekSubmitted}
                   className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors
                     ${
-                      isFutureDate(selectedDay) || isWeekSubmitted
+                      isLockedDay || isWeekSubmitted
                         ? "bg-gray-100 dark:bg-zinc-800 text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
                         : "bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300"
                     }
@@ -1159,23 +1187,31 @@ export function ManagerTimesheetEntry() {
                 <p className="text-sm mb-2">
                   {isWeekSubmitted
                     ? "No entries for this day (Week locked)"
-                    : "No entries for this day"}
+                    : isPastDate(selectedDay)
+                      ? "Previous-day entries are locked (Read-only)"
+                      : isFutureDate(selectedDay)
+                        ? "Future date — entries cannot be added yet"
+                        : "No entries for this day"}
                 </p>
-                {isWeekSubmitted ? (
+                {isWeekSubmitted || isLockedDay ? (
                   <p className="text-xs text-gray-500">
-                    Cannot add entries - timesheet is submitted/approved
+                    {isWeekSubmitted
+                      ? "Cannot add entries — timesheet is submitted/approved"
+                      : isPastDate(selectedDay)
+                        ? "Previous-day timesheets are locked"
+                        : "Future dates cannot be logged yet"}
                   </p>
                 ) : (
                   <Button
                     variant="link"
                     onClick={
-                      !isFutureDate(selectedDay) && !isWeekSubmitted
+                      !isLockedDay && !isWeekSubmitted
                         ? openAddDialog
                         : undefined
                     }
-                    disabled={isFutureDate(selectedDay) || isWeekSubmitted}
+                    disabled={isLockedDay || isWeekSubmitted}
                     className={
-                      isFutureDate(selectedDay) || isWeekSubmitted
+                      isLockedDay || isWeekSubmitted
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }
@@ -1253,26 +1289,28 @@ export function ManagerTimesheetEntry() {
                           "Draft",
                           "Manager_Rejected",
                           "Admin_Rejected",
-                        ].includes(statusName) && (
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => openEditDialog(entry)}
-                            >
-                              <Pencil className="w-3.5 h-3.5 text-gray-500" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 hover:text-red-600"
-                              onClick={() => handleDeleteEntry(entry.entry_id)}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        )}
+                        ].includes(statusName) &&
+                          !isLockedDay &&
+                          statusName !== "Locked" && (
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => openEditDialog(entry)}
+                              >
+                                <Pencil className="w-3.5 h-3.5 text-gray-500" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 hover:text-red-600"
+                                onClick={() => handleDeleteEntry(entry.entry_id)}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          )}
                       </div>
                     </div>
                   );

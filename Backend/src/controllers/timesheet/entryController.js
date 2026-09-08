@@ -110,7 +110,13 @@ export const createEntry = async (req, res) => {
 
     if (entryDateObj.getTime() > today.getTime()) {
       return res.status(400).json({
-        error: "Future date entries are not allowed",
+        error: "Future date timesheets are locked and cannot be added.",
+      });
+    }
+
+    if (entryDateObj.getTime() < today.getTime()) {
+      return res.status(400).json({
+        error: "Previous date timesheets are locked and cannot be added.",
       });
     }
 
@@ -727,6 +733,17 @@ export const updateEntry = async (req, res) => {
       });
     }
 
+    const entryDateObj = new Date(entry.entry_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    entryDateObj.setHours(0, 0, 0, 0);
+
+    if (entryDateObj.getTime() !== today.getTime()) {
+      return res.status(400).json({
+        error: "Previous-day and future-day timesheet entries are locked and cannot be edited.",
+      });
+    }
+
     /* ---------------------------------------------------
        2. Convert & validate minutes
     --------------------------------------------------- */
@@ -904,7 +921,13 @@ export const submitWeek = async (req, res) => {
     const newStatusName = "Submitted";
     const newStatusId = await getTimesheetStatusId(newStatusName);
 
-    const editableStatusNames = ["Draft", "Manager_Rejected", "Admin_Rejected"];
+    const editableStatusNames = [
+      "Draft",
+      "Locked",
+      "Saved",
+      "Manager_Rejected",
+      "Admin_Rejected",
+    ];
     const editableStatusIds = await getTimesheetStatusIds(editableStatusNames);
 
     const rejectedStatusNames = ["Manager_Rejected", "Admin_Rejected"];
@@ -1275,9 +1298,9 @@ export const deleteEntry = async (req, res) => {
     const employeeId = req.user?.id;
     const { id } = req.params;
 
-    // First, get the entry to check its status
+    // First, get the entry to check its status and date
     const entryCheck = await pool.query(
-      `SELECT week_start_date, week_end_date, status
+      `SELECT week_start_date, week_end_date, status, entry_date
        FROM daily_timesheet_entries
        WHERE entry_id = $1 AND employee_id = $2`,
       [id, employeeId],
@@ -1288,10 +1311,22 @@ export const deleteEntry = async (req, res) => {
     }
 
     const entry = entryCheck.rows[0];
+
+    const entryDateObj = new Date(entry.entry_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    entryDateObj.setHours(0, 0, 0, 0);
+
+    if (entryDateObj.getTime() !== today.getTime()) {
+      return res.status(400).json({
+        error: "Previous-day and future-day timesheet entries are locked and cannot be deleted.",
+      });
+    }
+
     const allowedStatusNames = ["Draft", "Manager_Rejected", "Admin_Rejected"];
     const allowedStatusIds = await getTimesheetStatusIds(allowedStatusNames);
 
-    // ✅ Only Draft/Rejected entries can be deleted (NOT approved)
+    // ✅ Only Draft/Rejected entries can be deleted (NOT approved or locked)
     if (!allowedStatusIds.includes(entry.status)) {
       return res.status(400).json({
         error:
@@ -1345,7 +1380,10 @@ export const getWeekStatus = async (req, res) => {
     }
 
     const statuses = result.rows.map((r) => r.name);
-    const hasDraft = statuses.includes("Draft");
+    const hasDraft =
+      statuses.includes("Draft") ||
+      statuses.includes("Locked") ||
+      statuses.includes("Saved");
     const hasRejected = statuses.some((s) => s.includes("Rejected"));
 
     res.json({
@@ -1366,6 +1404,16 @@ export const getEntriesByDateRange = async (req, res) => {
   try {
     const employeeId = req.user?.id;
     const { startDate, endDate } = req.query;
+
+    // Automatically lock any past unsubmitted entries for this employee
+    await pool.query(
+      `UPDATE daily_timesheet_entries
+       SET status = (SELECT id FROM timesheet_status WHERE name = 'Locked')
+       WHERE employee_id = $1
+         AND entry_date < CURRENT_DATE
+         AND status IN (SELECT id FROM timesheet_status WHERE name IN ('Saved', 'Draft'))`,
+      [employeeId],
+    );
 
     const result = await pool.query(
       `SELECT

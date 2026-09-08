@@ -11,6 +11,7 @@ export const TIMESHEET_STATUS = {
   SUBMITTED: "Submitted",
   APPROVED: "Approved",
   REJECTED: "Reject",
+  LOCKED: "Locked",
 };
 
 // Project statuses

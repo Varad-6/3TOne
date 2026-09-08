@@ -19,6 +19,7 @@ const constants = {
     PARTIALLY_APPROVED: "Partially_Approved",
     // Legacy / compatibility alias if older data used a generic "Approved"
     APPROVED: "Approved",
+    LOCKED: "Locked",
   },
 
 

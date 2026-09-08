@@ -1431,9 +1431,10 @@ const STATUS_MAP = {
   2: "Submitted",
   3: "Manager_Approved",
   4: "Manager_Rejected",
-  5: "Admin_Approved",
-  6: "Admin_Rejected",
-  7: "Partially_Approved",
+  5: "Locked",
+  6: "Admin_Approved",
+  7: "Admin_Rejected",
+  8: "Partially_Approved",
 };
 
 function getStatusName(status) {
@@ -1472,6 +1473,8 @@ const getUser = () => {
 };
 
 const isFutureDate = (date) => toIso(date) > toIso(new Date());
+const isPastDate = (date) => toIso(date) < toIso(new Date());
+const isLockedDate = (date) => isFutureDate(date) || isPastDate(date);
 
 // ============================================
 // MAIN COMPONENT
@@ -1603,7 +1606,7 @@ export function EmployeeTimesheetEntry() {
 
   const pendingEntries = entries.filter((e) => {
     const s = getStatusName(e.status);
-    return ["Draft", "Manager_Rejected", "Admin_Rejected"].includes(s);
+    return ["Draft", "Locked", "Saved", "Manager_Rejected", "Admin_Rejected"].includes(s);
   });
 
   const getWeeklyStatus = () => {
@@ -1624,26 +1627,28 @@ export function EmployeeTimesheetEntry() {
   );
 
   /**
-   * Week is locked when every entry is outside the editable statuses.
-   * Covers Submitted, Approved, Partially_Approved states.
+   * Week is submitted/locked when every entry is outside editable statuses.
+   * Locked/Draft/Saved/Rejected entries allow week submission.
    */
   const isWeekSubmitted = useMemo(() => {
     if (entries.length === 0) return false;
     return entries
       .map((e) => getStatusName(e.status))
       .every(
-        (s) => !["Draft", "Manager_Rejected", "Admin_Rejected"].includes(s),
+        (s) => !["Draft", "Locked", "Saved", "Manager_Rejected", "Admin_Rejected"].includes(s),
       );
   }, [entries]);
 
   const future = isFutureDate(selectedDay);
+  const past = isPastDate(selectedDay);
+  const isLockedDay = future || past;
 
   /**
    * Single guard for all entry-creation surfaces:
-   * true  → future date selected, OR week is submitted/locked
+   * true  → future or past date selected, OR week is submitted/locked
    * false → safe to add
    */
-  const cannotAdd = future || isWeekSubmitted;
+  const cannotAdd = isLockedDay || isWeekSubmitted;
 
   // ─── Data loading ─────────────────────────────────────────────────────────
 
@@ -1795,6 +1800,10 @@ export function EmployeeTimesheetEntry() {
 
   const openEditDialog = async (entry) => {
     const statusName = getStatusName(entry.status);
+    if (isLockedDay || statusName === "Locked") {
+      toast.error("Timesheet entries for previous and future days are locked and cannot be edited.");
+      return;
+    }
     if (!["Draft", "Manager_Rejected", "Admin_Rejected"].includes(statusName)) {
       toast.error("Cannot edit entry pending approval or already approved.");
       return;
@@ -1828,6 +1837,10 @@ export function EmployeeTimesheetEntry() {
 
     if (toIso(selectedDay) > toIso(new Date())) {
       toast.error("You cannot add entries for future dates");
+      return;
+    }
+    if (toIso(selectedDay) < toIso(new Date())) {
+      toast.error("Timesheet entries for previous days are locked and cannot be added or modified");
       return;
     }
     if (!projectId || !ticketId || !taskId || !hours) {
@@ -1903,6 +1916,10 @@ export function EmployeeTimesheetEntry() {
   const handleDeleteEntry = async (entryId) => {
     const entry = entries.find((e) => e.entry_id === entryId);
     const statusName = getStatusName(entry?.status);
+    if (isLockedDay || statusName === "Locked") {
+      toast.error("Previous-day and future-day timesheet entries are locked and cannot be deleted.");
+      return;
+    }
     if (
       !entry ||
       !["Draft", "Manager_Rejected", "Admin_Rejected"].includes(statusName)
@@ -1994,7 +2011,10 @@ export function EmployeeTimesheetEntry() {
     const statusName = getStatusName(status);
     let color = "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-zinc-800";
     let icon = <Clock className="w-3 h-3 mr-1" />;
-    if (statusName === "Submitted") {
+    if (statusName === "Locked") {
+      color = "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-zinc-700";
+      icon = <Clock className="w-3 h-3 mr-1" />;
+    } else if (statusName === "Submitted") {
       color = "bg-yellow-50 text-yellow-700 border-yellow-200";
       icon = <AlertCircle className="w-3 h-3 mr-1" />;
     } else if (statusName === "Partially_Approved") {
@@ -2218,12 +2238,20 @@ export function EmployeeTimesheetEntry() {
                 <p className="text-sm mb-2">
                   {isWeekSubmitted
                     ? "No entries for this day (Week locked)"
-                    : "No entries for this day"}
+                    : past
+                      ? "Previous-day entries are locked (Read-only)"
+                      : future
+                        ? "Future date — entries cannot be added yet"
+                        : "No entries for this day"}
                 </p>
 
-                {isWeekSubmitted ? (
+                {isWeekSubmitted || isLockedDay ? (
                   <p className="text-xs text-gray-500">
-                    Cannot add entries — timesheet is submitted/approved
+                    {isWeekSubmitted
+                      ? "Cannot add entries — timesheet is submitted/approved"
+                      : past
+                        ? "Previous-day timesheets are locked"
+                        : "Future dates cannot be logged yet"}
                   </p>
                 ) : (
                   /*
@@ -2307,26 +2335,28 @@ export function EmployeeTimesheetEntry() {
                           "Draft",
                           "Manager_Rejected",
                           "Admin_Rejected",
-                        ].includes(statusName) && (
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => openEditDialog(entry)}
-                            >
-                              <Pencil className="w-3.5 h-3.5 text-gray-500" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 hover:text-red-600"
-                              onClick={() => handleDeleteEntry(entry.entry_id)}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        )}
+                        ].includes(statusName) &&
+                          !isLockedDay &&
+                          statusName !== "Locked" && (
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => openEditDialog(entry)}
+                              >
+                                <Pencil className="w-3.5 h-3.5 text-gray-500" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 hover:text-red-600"
+                                onClick={() => handleDeleteEntry(entry.entry_id)}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          )}
                       </div>
                     </div>
                   );
