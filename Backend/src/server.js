@@ -165,6 +165,7 @@ import morgan from "morgan";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 
 // Import custom middleware
@@ -279,15 +280,24 @@ app.use("/api/email", emailRoutes);
 // ----------------------
 
 if (process.env.NODE_ENV === "production") {
-const reactBuildPath = path.join(__dirname, "../../Frontend/dist");
-app.use(express.static(reactBuildPath));
+  const reactBuildPath = path.join(__dirname, "../../Frontend/dist");
+  const indexPath = path.join(reactBuildPath, "index.html");
 
-// ----------------------
-// ✅ React SPA Fallback for /web routes
-// ----------------------
-app.get("*", (req, res) => {
- res.sendFile(path.join(reactBuildPath, "index.html"));
-});
+  if (fs.existsSync(indexPath)) {
+    app.use(express.static(reactBuildPath));
+    app.get("*", (req, res) => {
+      res.sendFile(indexPath);
+    });
+  } else {
+    app.get("/", (req, res) => {
+      res.json({
+        status: "OK",
+        service: "Timesheet Backend API",
+        message: "API server is running. Please access the web app at http://localhost:3000",
+        frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
+      });
+    });
+  }
 }
 
 // ----------------------
