@@ -1,21 +1,34 @@
--- 1. Create project_status table and migrate
-CREATE TABLE project_status (id SERIAL PRIMARY KEY, name VARCHAR(50) UNIQUE);
-INSERT INTO project_status (name) VALUES ('Planned'), ('In Progress'), ('Completed'), ('On Hold'), ('Cancelled');
-ALTER TABLE project_master ADD COLUMN new_status INTEGER;
-UPDATE project_master SET new_status = (SELECT id FROM project_status WHERE name = project_master.status::text);
-ALTER TABLE project_master DROP COLUMN status CASCADE;
-ALTER TABLE project_master RENAME COLUMN new_status TO status;
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'project_status' AND typtype = 'e') THEN
+    DROP TYPE project_status CASCADE;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS project_status (id SERIAL PRIMARY KEY, name VARCHAR(50) UNIQUE);
+INSERT INTO project_status (name) VALUES ('Planned'), ('In Progress'), ('Completed'), ('On Hold'), ('Cancelled') ON CONFLICT DO NOTHING;
 
--- 2. Add columns to project_master
-ALTER TABLE project_master ADD COLUMN description TEXT;
-ALTER TABLE project_master ADD COLUMN spoc_name VARCHAR(100);
-ALTER TABLE project_master ADD COLUMN spoc_email VARCHAR(100);
-ALTER TABLE project_master ADD COLUMN spoc_phone VARCHAR(50);
-ALTER TABLE project_master ADD COLUMN billable_hours NUMERIC DEFAULT 0;
-ALTER TABLE project_master ADD COLUMN zoho_crm_code VARCHAR(100);
+ALTER TABLE project_master ADD COLUMN IF NOT EXISTS status INTEGER;
 
--- 3. Create project_manager_assignment table
-CREATE TABLE project_manager_assignment (
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='project_master' AND column_name='id') THEN
+    ALTER TABLE project_master RENAME COLUMN id TO project_id;
+  END IF;
+END $$;
+
+ALTER TABLE project_master ADD COLUMN IF NOT EXISTS billable_hours NUMERIC DEFAULT 0;
+ALTER TABLE project_master ADD COLUMN IF NOT EXISTS zoho_crm_code VARCHAR(100);
+
+ALTER TABLE client_master ADD COLUMN IF NOT EXISTS zoho_crm_code VARCHAR(100);
+
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='client_master' AND column_name='id') THEN
+    ALTER TABLE client_master RENAME COLUMN id TO client_id;
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS project_manager_assignment (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID REFERENCES project_master(project_id),
   manager_id UUID REFERENCES employees(employee_id),
@@ -24,8 +37,7 @@ CREATE TABLE project_manager_assignment (
   is_active BOOLEAN DEFAULT TRUE
 );
 
--- 4. Create daily_timesheet_entries table
-CREATE TABLE daily_timesheet_entries (
+CREATE TABLE IF NOT EXISTS daily_timesheet_entries (
   entry_id SERIAL PRIMARY KEY,
   employee_id UUID REFERENCES employees(employee_id),
   project_id UUID REFERENCES project_master(project_id),
@@ -45,16 +57,13 @@ CREATE TABLE daily_timesheet_entries (
   status INTEGER
 );
 
--- 5. Add separation_date to employees
-ALTER TABLE employees ADD COLUMN separation_date DATE;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS separation_date DATE;
 
--- 6. Insert dummy data for admin
 INSERT INTO daily_timesheet_entries (
   employee_id, entry_date, week_start_date, week_end_date, total_hours, billable_hours, status
 ) VALUES 
   ((SELECT employee_id FROM employees WHERE email='admin@example.com'), CURRENT_DATE, CURRENT_DATE - INTERVAL '1 day', CURRENT_DATE + INTERVAL '5 days', 8, 8, 2),
   ((SELECT employee_id FROM employees WHERE email='admin@example.com'), CURRENT_DATE - INTERVAL '1 day', CURRENT_DATE - INTERVAL '1 day', CURRENT_DATE + INTERVAL '5 days', 8, 8, 4);
 
--- Insert dummy data into project_master
 INSERT INTO client_master (client_name, client_code, zoho_crm_code, is_active) VALUES ('Dummy Client', 'DUMMY', 'DUMMY', TRUE) ON CONFLICT DO NOTHING;
 INSERT INTO project_master (project_name, client_id, status, is_active) VALUES ('Dummy Project', (SELECT client_id FROM client_master WHERE client_code='DUMMY' LIMIT 1), 2, TRUE);

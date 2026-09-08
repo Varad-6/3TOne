@@ -1,8 +1,8 @@
-CREATE TABLE user_roles (id SERIAL PRIMARY KEY, name VARCHAR(50) UNIQUE);
-INSERT INTO user_roles (name) VALUES ('ADMIN'), ('MANAGER'), ('EMPLOYEE');
+CREATE TABLE IF NOT EXISTS user_roles (id SERIAL PRIMARY KEY, name VARCHAR(50) UNIQUE);
+INSERT INTO user_roles (name) VALUES ('ADMIN'), ('MANAGER'), ('EMPLOYEE') ON CONFLICT DO NOTHING;
 
-CREATE TABLE departments (id SERIAL PRIMARY KEY, name VARCHAR(100) UNIQUE);
-INSERT INTO departments (name) VALUES ('Administration'), ('Engineering'), ('Product');
+CREATE TABLE IF NOT EXISTS departments (id SERIAL PRIMARY KEY, name VARCHAR(100) UNIQUE);
+INSERT INTO departments (name) VALUES ('Administration'), ('Engineering'), ('Product') ON CONFLICT DO NOTHING;
 
 ALTER TABLE employees RENAME COLUMN employee_id TO employee_code;
 ALTER TABLE employees RENAME COLUMN id TO employee_id;

@@ -1,4 +1,9 @@
-DROP TYPE IF EXISTS project_status CASCADE;
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'project_status' AND typtype = 'e') THEN
+    DROP TYPE project_status CASCADE;
+  END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS project_status (id SERIAL PRIMARY KEY, name VARCHAR(50) UNIQUE);
 INSERT INTO project_status (name) VALUES ('Planned'), ('In Progress'), ('Completed'), ('On Hold'), ('Cancelled') ON CONFLICT DO NOTHING;
 
