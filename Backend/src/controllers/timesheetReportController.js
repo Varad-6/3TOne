@@ -3127,13 +3127,116 @@ async function resolveEmployeeIds(raw) {
 // KEY FIXES vs original:
 //  • employees — removed is_active filter → ALL employees visible
 //  • projects  — removed is_active filter → ALL projects visible
-//  • tickets   — ADDED (was completely missing)
+// ──────────────────────────────────────────────────────────────
+// Helper: getManagerScope
+// Computes projects, tickets, and employees relevant to a manager:
+// 1. Projects: project_manager_assignment, project_assignments, ticket_assignments (assigned or assigned_by), direct reports' projects, and daily_timesheet_entries.
+// 2. Tickets: tickets in manager's projects, tickets assigned to manager or assigned by manager, direct reports' tickets, and daily_timesheet_entries.
+// 3. Employees: manager themselves, direct reports (module_manager_id), employees assigned to manager's projects/tickets, and employees with logged timesheet entries under manager.
+// ──────────────────────────────────────────────────────────────
+export async function getManagerScope(callerId) {
+  if (!callerId) {
+    return {
+      projectIds: [],
+      ticketIds: [],
+      employeeIds: [],
+    };
+  }
+
+  // 1. Find all projects associated with this manager
+  const { rows: projRows } = await pool.query(
+    `SELECT DISTINCT project_id FROM (
+      SELECT project_id FROM project_manager_assignment WHERE manager_id = $1 AND is_active = TRUE AND project_id IS NOT NULL
+      UNION
+      SELECT project_id FROM project_assignments WHERE manager_id = $1 AND is_active = TRUE AND project_id IS NOT NULL
+      UNION
+      SELECT project_id FROM ticket_assignments WHERE employee_id = $1 AND is_active = TRUE AND project_id IS NOT NULL
+      UNION
+      SELECT project_id FROM ticket_assignments WHERE assigned_by = $1 AND is_active = TRUE AND project_id IS NOT NULL
+      UNION
+      SELECT ta.project_id FROM ticket_assignments ta
+        JOIN employees emp ON emp.employee_id = ta.employee_id
+        WHERE emp.module_manager_id = $1 AND ta.is_active = TRUE AND ta.project_id IS NOT NULL
+      UNION
+      SELECT COALESCE(dte.project_id, tm.project_id) AS project_id
+        FROM daily_timesheet_entries dte
+        LEFT JOIN ticket_master tm ON tm.ticket_id = dte.ticket_id
+        WHERE dte.manager_id = $1 AND COALESCE(dte.project_id, tm.project_id) IS NOT NULL
+    ) p`,
+    [callerId],
+  );
+  const projectIds = projRows.map((r) => r.project_id).filter(Boolean);
+
+  // 2. Find all tickets associated with this manager
+  const fallbackProj =
+    projectIds.length > 0
+      ? projectIds
+      : ["00000000-0000-0000-0000-000000000000"];
+  const { rows: tktRows } = await pool.query(
+    `SELECT DISTINCT ticket_id FROM (
+      SELECT ticket_id FROM ticket_master WHERE project_id = ANY($2::uuid[]) AND is_active = TRUE AND ticket_id IS NOT NULL
+      UNION
+      SELECT ticket_id FROM ticket_assignments WHERE employee_id = $1 AND is_active = TRUE AND ticket_id IS NOT NULL
+      UNION
+      SELECT ticket_id FROM ticket_assignments WHERE assigned_by = $1 AND is_active = TRUE AND ticket_id IS NOT NULL
+      UNION
+      SELECT ta.ticket_id FROM ticket_assignments ta
+        JOIN employees emp ON emp.employee_id = ta.employee_id
+        WHERE emp.module_manager_id = $1 AND ta.is_active = TRUE AND ta.ticket_id IS NOT NULL
+      UNION
+      SELECT ticket_id FROM daily_timesheet_entries WHERE manager_id = $1 AND ticket_id IS NOT NULL
+    ) t`,
+    [callerId, fallbackProj],
+  );
+  const ticketIds = tktRows.map((r) => r.ticket_id).filter(Boolean);
+
+  // 3. Find all relevant employees (manager himself, direct reports, assigned employees, logged entries)
+  const fallbackTkt =
+    ticketIds.length > 0
+      ? ticketIds
+      : ["00000000-0000-0000-0000-000000000000"];
+  const { rows: empRows } = await pool.query(
+    `SELECT DISTINCT employee_id FROM (
+      SELECT $1::uuid AS employee_id
+      UNION
+      SELECT employee_id FROM employees WHERE module_manager_id = $1
+      UNION
+      SELECT employee_id FROM ticket_assignments
+        WHERE is_active = TRUE
+          AND (
+            project_id = ANY($2::uuid[])
+            OR ticket_id = ANY($3::uuid[])
+            OR assigned_by = $1
+          )
+      UNION
+      SELECT employee_id FROM daily_timesheet_entries
+        WHERE manager_id = $1
+          OR project_id = ANY($2::uuid[])
+          OR ticket_id = ANY($3::uuid[])
+    ) e WHERE employee_id IS NOT NULL`,
+    [callerId, fallbackProj, fallbackTkt],
+  );
+  const employeeIds = empRows.map((r) => r.employee_id).filter(Boolean);
+
+  return { projectIds, ticketIds, employeeIds };
+}
+
+// ──────────────────────────────────────────────────────────────
+// GET /api/timesheet-report/filter-options
+//
+// Returns every dropdown dataset the frontend needs in one call.
+// Each sub-query runs independently via safeQuery() — one failing
+// table never blocks the others from returning data.
+//
+// KEY FIXES vs original:
+//  • employees — scoped for manager to relevant employees only
+//  • projects  — scoped for manager to manager's projects
+//  • tickets   — scoped for manager to manager's tickets
+//  • clients   — scoped for manager to clients on manager's projects
 // ──────────────────────────────────────────────────────────────
 export const getReportFilterOptions = async (req, res) => {
   try {
     // ── Identify caller role and identity ────────────────────────────────────
-    // req.user is populated by authenticateToken middleware from the JWT payload.
-    // employee_id is the standard field; fall back to id for safety.
     const callerRole = req.user?.role;
     const callerId = req.user?.employee_id || req.user?.id;
     const isManager = callerRole === "MANAGER";
@@ -3143,37 +3246,36 @@ export const getReportFilterOptions = async (req, res) => {
       callerRole,
     );
 
-    // ── MANAGER: get the project_ids they are assigned to ───────────────────
-    // Uses project_manager_assignment table.
-    // All scoped dropdowns (projects, tickets, clients) are restricted to these.
-    let managerProjectIds = [];
-    if (isManager && callerId) {
-      const { rows: pmaRows } = await pool.query(
-        `SELECT DISTINCT project_id
-           FROM project_manager_assignment
-          WHERE manager_id = $1
-            AND project_id IS NOT NULL`,
-        [callerId],
-      );
-      managerProjectIds = pmaRows.map((r) => r.project_id).filter(Boolean);
-    }
+    const scope = isManager ? await getManagerScope(callerId) : null;
+    const DUMMY_UUID = "00000000-0000-0000-0000-000000000000";
+    const managerProjectIds = scope?.projectIds || [];
+    const managerTicketIds = scope?.ticketIds || [];
+    const managerEmployeeIds = scope?.employeeIds || [];
 
-    // When manager has no assigned projects, scoped queries should return empty.
-    // We still run them (they'll just return 0 rows) so the response shape is consistent.
     const projectIdFilter =
       isManager && managerProjectIds.length > 0
         ? managerProjectIds
         : isManager
-          ? ["00000000-0000-0000-0000-000000000000"] // dummy uuid → 0 rows
-          : null; // null = ADMIN = no restriction
+          ? [DUMMY_UUID]
+          : null;
+
+    const employeeIdFilter =
+      isManager && managerEmployeeIds.length > 0
+        ? managerEmployeeIds
+        : isManager
+          ? [DUMMY_UUID]
+          : null;
+
+    const ticketIdFilter =
+      isManager && managerTicketIds.length > 0
+        ? managerTicketIds
+        : isManager
+          ? [DUMMY_UUID]
+          : null;
 
     // ── 1. Employees ─────────────────────────────────────────────────────────
-    //   ADMIN   → ALL employees (active + inactive)
-    //   MANAGER → employees who have LOGGED TIME on the manager's projects.
-    //             Uses daily_timesheet_entries as the source of truth so that
-    //             employees always appear even when ticket_assignments is empty
-    //             or not populated. Also catches employees assigned via
-    //             ticket_manager_scope (managers logging their own time).
+    //   ADMIN   → ALL employees
+    //   MANAGER → relevant employees only (manager themselves, direct reports, project/ticket workers)
     const employees = isManager
       ? await safeQuery(
           "employees",
@@ -3186,14 +3288,9 @@ export const getReportFilterOptions = async (req, res) => {
              e.is_active
            FROM employees e
            LEFT JOIN departments d ON d.id = e.department
-           WHERE e.employee_id IN (
-             SELECT DISTINCT dte.employee_id
-             FROM   daily_timesheet_entries dte
-             WHERE  dte.project_id = ANY($1::uuid[])
-               AND  dte.employee_id IS NOT NULL
-           )
-           ORDER BY e.is_active DESC, e.first_name ASC, e.last_name ASC`,
-          [projectIdFilter],
+           WHERE e.employee_id = ANY($1::uuid[])
+           ORDER BY e.is_active DESC, name ASC`,
+          [employeeIdFilter],
         )
       : await safeQuery(
           "employees",
@@ -3210,8 +3307,8 @@ export const getReportFilterOptions = async (req, res) => {
         );
 
     // ── 2. Projects ──────────────────────────────────────────────────────────
-    //   ADMIN   → ALL projects (active + inactive)
-    //   MANAGER → only projects assigned to them via project_manager_assignment
+    //   ADMIN   → ALL projects
+    //   MANAGER → only projects within manager scope
     const projects = isManager
       ? await safeQuery(
           "projects",
@@ -3246,7 +3343,7 @@ export const getReportFilterOptions = async (req, res) => {
 
     // ── 3. Tickets ───────────────────────────────────────────────────────────
     //   ADMIN   → ALL tickets
-    //   MANAGER → only tickets belonging to their assigned projects
+    //   MANAGER → tickets belonging to manager scope or manager projects
     const tickets = isManager
       ? await safeQuery(
           "tickets",
@@ -3261,9 +3358,9 @@ export const getReportFilterOptions = async (req, res) => {
            FROM ticket_master tm
            LEFT JOIN project_master pm ON pm.project_id = tm.project_id
            LEFT JOIN client_master  cm ON cm.client_id  = pm.client_id
-           WHERE tm.project_id = ANY($1::uuid[])
+           WHERE (tm.ticket_id = ANY($1::uuid[]) OR tm.project_id = ANY($2::uuid[]))
            ORDER BY tm.is_active DESC, tm.ticket_name ASC`,
-          [projectIdFilter],
+          [ticketIdFilter, projectIdFilter],
         )
       : await safeQuery(
           "tickets",
@@ -3415,18 +3512,11 @@ export const getTimesheetReport = async (req, res) => {
     const sortCol = ALLOWED_SORT[sortBy] || "dte.entry_date";
     const dir = sortDir === "asc" ? "ASC" : "DESC";
 
-    // Manager scope: restrict unfiltered reports to assigned projects
+    // Manager scope: restrict reports to relevant employees and manager's projects/tickets
     const callerRole = req.user?.role;
     const callerId = req.user?.employee_id || req.user?.id;
     const isManager = callerRole === "MANAGER";
-    let managerProjectIds = [];
-    if (isManager && callerId) {
-      const pmaRows = await pool.query(
-        "SELECT DISTINCT project_id FROM project_manager_assignment WHERE manager_id = $1 AND project_id IS NOT NULL",
-        [callerId],
-      );
-      managerProjectIds = pmaRows.rows.map((r) => r.project_id).filter(Boolean);
-    }
+    const scope = isManager ? await getManagerScope(callerId) : null;
 
     // ── Build dynamic WHERE conditions ───────────────────────
     // Rule: every resolve*() returns null on miss → guard with if(uuid)
@@ -3453,18 +3543,24 @@ export const getTimesheetReport = async (req, res) => {
       }
     }
 
-    // Manager scope — ALWAYS enforced for MANAGER callers regardless of whether
-    // the user also sent a projectIds filter. Both conditions are ANDed together,
-    // so the result is the intersection: entries from the user-chosen projects
-    // that also belong to the manager's assigned projects. This prevents a
-    // manager from bypassing the scope by providing arbitrary projectIds.
+    // Manager scope — ALWAYS enforced for MANAGER callers
     if (isManager) {
-      const scopeIds =
-        managerProjectIds.length > 0
-          ? managerProjectIds
-          : ["00000000-0000-0000-0000-000000000000"]; // dummy → 0 rows when no assigned projects
-      conditions.push(`dte.project_id = ANY($${idx++}::uuid[])`);
-      params.push(scopeIds);
+      const DUMMY = "00000000-0000-0000-0000-000000000000";
+      const empScope = scope.employeeIds.length > 0 ? scope.employeeIds : [DUMMY];
+      const projScope = scope.projectIds.length > 0 ? scope.projectIds : [DUMMY];
+      const tktScope = scope.ticketIds.length > 0 ? scope.ticketIds : [DUMMY];
+
+      conditions.push(`(
+        dte.employee_id = ANY($${idx++}::uuid[])
+        AND (
+          COALESCE(dte.project_id, tm.project_id) = ANY($${idx++}::uuid[])
+          OR dte.ticket_id = ANY($${idx++}::uuid[])
+          OR dte.manager_id = $${idx++}
+          OR e.module_manager_id = $${idx++}
+          OR dte.employee_id = $${idx++}
+        )
+      )`);
+      params.push(empScope, projScope, tktScope, callerId, callerId, callerId);
     }
 
     // Tickets — multi-select: ANY($N::uuid[])
@@ -3563,13 +3659,12 @@ export const getTimesheetReport = async (req, res) => {
         dte.billable_hours,
         dte.non_billable_hours,
         dte.ticket_number,
-        dte.description,
-        -- dte.submitted_at,
+        dte.submitted_at,
         dte.approved_at,
         dte.rejected_at,
         dte.rejection_reason,
-        -- dte.created_at,
-        -- dte.updated_at,
+        dte.created_at,
+        dte.updated_at,
 
         -- Status
         ts.name                                              AS status,
@@ -3607,8 +3702,8 @@ export const getTimesheetReport = async (req, res) => {
         mgr.last_name                                        AS manager_last_name,
 
         -- Approver / Rejector full names
-        COALESCE(apr.first_name || ' ' || apr.last_name, '') AS approved_by_name,
-        COALESCE(rej.first_name || ' ' || rej.last_name, '') AS rejected_by_name,
+        ''                                                   AS approved_by_name,
+        ''                                                   AS rejected_by_name,
 
         -- Task
         task.task                                            AS task_name,
@@ -3745,16 +3840,7 @@ export const getGroupedTimesheetReport = async (req, res) => {
     const callerRole = req.user?.role;
     const callerId = req.user?.employee_id || req.user?.id;
     const isManager = callerRole === "MANAGER";
-    let managerProjectIds = [];
-    if (isManager && callerId) {
-      const pmaRows = await pool.query(
-        `SELECT DISTINCT project_id
-           FROM project_manager_assignment
-          WHERE manager_id = $1 AND project_id IS NOT NULL`,
-        [callerId],
-      );
-      managerProjectIds = pmaRows.rows.map((r) => r.project_id).filter(Boolean);
-    }
+    const scope = isManager ? await getManagerScope(callerId) : null;
 
     const conditions = [];
     const params = [];
@@ -3776,12 +3862,22 @@ export const getGroupedTimesheetReport = async (req, res) => {
     }
     // Always enforce manager scope
     if (isManager) {
-      const scopeIds =
-        managerProjectIds.length > 0
-          ? managerProjectIds
-          : ["00000000-0000-0000-0000-000000000000"];
-      conditions.push(`dte.project_id = ANY($${idx++}::uuid[])`);
-      params.push(scopeIds);
+      const DUMMY = "00000000-0000-0000-0000-000000000000";
+      const empScope = scope.employeeIds.length > 0 ? scope.employeeIds : [DUMMY];
+      const projScope = scope.projectIds.length > 0 ? scope.projectIds : [DUMMY];
+      const tktScope = scope.ticketIds.length > 0 ? scope.ticketIds : [DUMMY];
+
+      conditions.push(`(
+        dte.employee_id = ANY($${idx++}::uuid[])
+        AND (
+          COALESCE(dte.project_id, tm.project_id) = ANY($${idx++}::uuid[])
+          OR dte.ticket_id = ANY($${idx++}::uuid[])
+          OR dte.manager_id = $${idx++}
+          OR e.module_manager_id = $${idx++}
+          OR dte.employee_id = $${idx++}
+        )
+      )`);
+      params.push(empScope, projScope, tktScope, callerId, callerId, callerId);
     }
     if (ticketIds) {
       const uuids = await resolveTicketIds(ticketIds);
@@ -3930,6 +4026,12 @@ export const getEmployeeSummaryReport = async (req, res) => {
       employeeId,
     } = req.query;
 
+    // Caller role & manager scope
+    const callerRole = req.user?.role;
+    const callerId = req.user?.employee_id || req.user?.id;
+    const isManager = callerRole === "MANAGER";
+    const scope = isManager ? await getManagerScope(callerId) : null;
+
     // Filters on the timesheet JOIN — keeps all employees in results
     const dteFilters = [];
     const params = [];
@@ -3956,8 +4058,29 @@ export const getEmployeeSummaryReport = async (req, res) => {
       }
     }
 
+    if (isManager) {
+      const DUMMY = "00000000-0000-0000-0000-000000000000";
+      const projScope = scope.projectIds.length > 0 ? scope.projectIds : [DUMMY];
+      const tktScope = scope.ticketIds.length > 0 ? scope.ticketIds : [DUMMY];
+      dteFilters.push(`(
+        dte.project_id = ANY($${idx++}::uuid[])
+        OR dte.ticket_id = ANY($${idx++}::uuid[])
+        OR dte.manager_id = $${idx++}
+        OR e.module_manager_id = $${idx++}
+        OR dte.employee_id = $${idx++}
+      )`);
+      params.push(projScope, tktScope, callerId, callerId, callerId);
+    }
+
     // Filters on which employees appear in the outer result set
     const empFilters = [];
+
+    if (isManager) {
+      const DUMMY = "00000000-0000-0000-0000-000000000000";
+      const empScope = scope.employeeIds.length > 0 ? scope.employeeIds : [DUMMY];
+      empFilters.push(`e.employee_id = ANY($${idx++}::uuid[])`);
+      params.push(empScope);
+    }
 
     if (departmentId) {
       empFilters.push(`e.department = $${idx++}`);
@@ -4020,13 +4143,15 @@ export const getEmployeeSummaryReport = async (req, res) => {
         COUNT(CASE WHEN ts.name = 'Admin_Approved'                      THEN 1 END) AS admin_approved_count,
         COUNT(CASE WHEN ts.name IN ('Manager_Approved','Admin_Approved') THEN 1 END) AS approved_count,
         COUNT(CASE WHEN ts.name IN ('Manager_Rejected','Admin_Rejected') THEN 1 END) AS rejected_count,
-        COUNT(CASE WHEN ts.name = 'Partially_Approved'                  THEN 1 END) AS partial_count
+        COUNT(CASE WHEN ts.name = 'Partially_Approved'                  THEN 1 END) AS partial_count,
+        COUNT(CASE WHEN ts.name = 'Locked'                              THEN 1 END) AS locked_count
 
       FROM employees e
       -- DTE join uses extra conditions in the ON clause, NOT a WHERE,
       -- so employees without matching entries still appear with 0 values.
       LEFT JOIN daily_timesheet_entries dte
              ON dte.employee_id = e.employee_id ${dteJoinExtra}
+      LEFT JOIN ticket_master    tm   ON tm.ticket_id    = dte.ticket_id
       LEFT JOIN timesheet_status ts   ON ts.id           = dte.status
       LEFT JOIN departments      dept ON dept.id         = e.department
       LEFT JOIN employees        mgr  ON mgr.employee_id = e.module_manager_id
@@ -4054,6 +4179,12 @@ export const getEmployeeSummaryReport = async (req, res) => {
         working_days: parseInt(r.working_days, 10),
         total_projects: parseInt(r.total_projects, 10),
         total_tickets: parseInt(r.total_tickets, 10),
+        draft_count: parseInt(r.draft_count, 10) || 0,
+        submitted_count: parseInt(r.submitted_count, 10) || 0,
+        approved_count: parseInt(r.approved_count, 10) || 0,
+        rejected_count: parseInt(r.rejected_count, 10) || 0,
+        partial_count: parseInt(r.partial_count, 10) || 0,
+        locked_count: parseInt(r.locked_count, 10) || 0,
         statusBreakdown: {
           draft: parseInt(r.draft_count, 10),
           submitted: parseInt(r.submitted_count, 10),
@@ -4062,6 +4193,7 @@ export const getEmployeeSummaryReport = async (req, res) => {
           approved: parseInt(r.approved_count, 10),
           rejected: parseInt(r.rejected_count, 10),
           partial: parseInt(r.partial_count, 10),
+          locked: parseInt(r.locked_count, 10),
         },
       })),
     });
@@ -4089,6 +4221,11 @@ export const getProjectSummaryReport = async (req, res) => {
   try {
     const { fromDate, toDate, clientId, projectIds, status } = req.query;
 
+    const callerRole = req.user?.role;
+    const callerId = req.user?.employee_id || req.user?.id;
+    const isManager = callerRole === "MANAGER";
+    const scope = isManager ? await getManagerScope(callerId) : null;
+
     // DTE join filters
     const dteFilters = [];
     const params = [];
@@ -4109,6 +4246,13 @@ export const getProjectSummaryReport = async (req, res) => {
 
     // Project master outer WHERE filters
     const pmFilters = [];
+
+    if (isManager) {
+      const DUMMY = "00000000-0000-0000-0000-000000000000";
+      const projScope = scope.projectIds.length > 0 ? scope.projectIds : [DUMMY];
+      pmFilters.push(`pm.project_id = ANY($${idx++}::uuid[])`);
+      params.push(projScope);
+    }
 
     if (clientId) {
       pmFilters.push(`pm.client_id = $${idx++}`);
@@ -4223,6 +4367,11 @@ export const getTicketSummaryReport = async (req, res) => {
     const { fromDate, toDate, projectIds, clientId, employeeId, status } =
       req.query;
 
+    const callerRole = req.user?.role;
+    const callerId = req.user?.employee_id || req.user?.id;
+    const isManager = callerRole === "MANAGER";
+    const scope = isManager ? await getManagerScope(callerId) : null;
+
     const dteFilters = [];
     const params = [];
     let idx = 1;
@@ -4255,6 +4404,14 @@ export const getTicketSummaryReport = async (req, res) => {
 
     // Ticket-level outer WHERE filters
     const tmFilters = [`tm.is_active = TRUE`];
+
+    if (isManager) {
+      const DUMMY = "00000000-0000-0000-0000-000000000000";
+      const projScope = scope.projectIds.length > 0 ? scope.projectIds : [DUMMY];
+      const tktScope = scope.ticketIds.length > 0 ? scope.ticketIds : [DUMMY];
+      tmFilters.push(`(tm.ticket_id = ANY($${idx++}::uuid[]) OR tm.project_id = ANY($${idx++}::uuid[]))`);
+      params.push(tktScope, projScope);
+    }
 
     if (projectIds) {
       const uuids = await resolveProjectIds(projectIds);
@@ -4389,29 +4546,19 @@ export const getEmployeeBillableReport = async (req, res) => {
     const callerRole = req.user?.role;
     const callerId = req.user?.employee_id || req.user?.id;
     const isManager = callerRole === "MANAGER";
+    const scope = isManager ? await getManagerScope(callerId) : null;
 
-    // Resolve the manager's assigned project IDs once — used in two places:
-    //   1. DTE LEFT JOIN ON clause (scope which hours are aggregated)
-    //   2. Employee WHERE clause (scope which employees are visible)
-    let managerProjectIds = [];
-    if (isManager && callerId) {
-      const { rows: pmaRows } = await pool.query(
-        `SELECT DISTINCT project_id
-           FROM project_manager_assignment
-          WHERE manager_id = $1 AND project_id IS NOT NULL`,
-        [callerId],
-      );
-      managerProjectIds = pmaRows.map((r) => r.project_id).filter(Boolean);
-    }
-
-    // Dummy UUID used when manager has no assigned projects so queries
-    // return 0 rows rather than an empty-array syntax error.
     const DUMMY_UUID = "00000000-0000-0000-0000-000000000000";
     const managerScopeIds = isManager
-      ? managerProjectIds.length > 0
-        ? managerProjectIds
+      ? scope.projectIds.length > 0
+        ? scope.projectIds
         : [DUMMY_UUID]
-      : null; // null = ADMIN = no scope restriction
+      : null;
+    const managerEmpScope = isManager
+      ? scope.employeeIds.length > 0
+        ? scope.employeeIds
+        : [DUMMY_UUID]
+      : null;
 
     // ── Parameter index tracker ─────────────────────────────────────────────
     // Parameters are positional ($1, $2 …) and must be pushed in exactly the
@@ -4436,10 +4583,17 @@ export const getEmployeeBillableReport = async (req, res) => {
       }
     }
 
-    // Manager project scope on DTE aggregation (always for MANAGER callers)
+    // Manager project/ticket scope on DTE aggregation (always for MANAGER callers)
     if (isManager) {
-      dteJoinConds.push(`dte.project_id = ANY($${idx++}::uuid[])`);
-      params.push(managerScopeIds);
+      const tktScope = scope.ticketIds.length > 0 ? scope.ticketIds : [DUMMY_UUID];
+      dteJoinConds.push(`(
+        dte.project_id = ANY($${idx++}::uuid[])
+        OR dte.ticket_id = ANY($${idx++}::uuid[])
+        OR dte.manager_id = $${idx++}
+        OR e.module_manager_id = $${idx++}
+        OR dte.employee_id = $${idx++}
+      )`);
+      params.push(managerScopeIds, tktScope, callerId, callerId, callerId);
     }
 
     // Ticket filter
@@ -4524,20 +4678,10 @@ export const getEmployeeBillableReport = async (req, res) => {
     }
 
     // Manager employee-visibility scope:
-    //   Show only employees who are assigned to tickets under the manager's
-    //   projects (ticket_assignments). Using ticket_assignments (not DTE) means
-    //   employees with zero logged hours but existing assignments still appear.
+    // Show only relevant employees (manager themselves, direct reports, assigned employees)
     if (isManager) {
-      empWhereConds.push(`
-        e.employee_id IN (
-          SELECT DISTINCT ta.employee_id
-          FROM   ticket_assignments ta
-          JOIN   ticket_master      tm ON tm.ticket_id   = ta.ticket_id
-          WHERE  tm.project_id = ANY($${idx++}::uuid[])
-            AND  ta.employee_id IS NOT NULL
-        )
-      `);
-      params.push(managerScopeIds);
+      empWhereConds.push(`e.employee_id = ANY($${idx++}::uuid[])`);
+      params.push(managerEmpScope);
     }
 
     const empWhereClause = `WHERE ${empWhereConds.join(" AND ")}`;
@@ -4709,20 +4853,11 @@ export const getHeaderPreviewReport = async (req, res) => {
     const callerRole = req.user?.role;
     const callerId = req.user?.employee_id || req.user?.id;
     const isManager = callerRole === "MANAGER";
-    let managerProjectIds = [];
-    if (isManager && callerId) {
-      const pmaRows = await pool.query(
-        `SELECT DISTINCT project_id
-           FROM project_manager_assignment
-          WHERE manager_id = $1 AND project_id IS NOT NULL`,
-        [callerId],
-      );
-      managerProjectIds = pmaRows.rows.map((r) => r.project_id).filter(Boolean);
-    }
+    const scope = isManager ? await getManagerScope(callerId) : null;
     const DUMMY = "00000000-0000-0000-0000-000000000000";
     const managerScopeIds = isManager
-      ? managerProjectIds.length > 0
-        ? managerProjectIds
+      ? scope.projectIds.length > 0
+        ? scope.projectIds
         : [DUMMY]
       : null;
 
@@ -4968,16 +5103,9 @@ export const exportTimesheetReport = async (req, res) => {
     const callerRole = req.user?.role;
     const callerId = req.user?.employee_id || req.user?.id;
     const isManager = callerRole === "MANAGER";
-    let managerProjectIds = [];
-    if (isManager && callerId) {
-      const pmaRows = await pool.query(
-        `SELECT DISTINCT project_id
-           FROM project_manager_assignment
-          WHERE manager_id = $1 AND project_id IS NOT NULL`,
-        [callerId],
-      );
-      managerProjectIds = pmaRows.rows.map((r) => r.project_id).filter(Boolean);
-    }
+    const scope = isManager ? await getManagerScope(callerId) : null;
+    const managerProjectIds = scope?.projectIds || [];
+    const managerEmployeeIds = scope?.employeeIds || [];
 
     // ── Build WHERE conditions ────────────────────────────────
     const conditions = [];
@@ -5002,12 +5130,22 @@ export const exportTimesheetReport = async (req, res) => {
 
     // Always enforce manager scope
     if (isManager) {
-      const scopeIds =
-        managerProjectIds.length > 0
-          ? managerProjectIds
-          : ["00000000-0000-0000-0000-000000000000"];
-      conditions.push(`dte.project_id = ANY($${idx++}::uuid[])`);
-      params.push(scopeIds);
+      const DUMMY = "00000000-0000-0000-0000-000000000000";
+      const empScope = scope.employeeIds.length > 0 ? scope.employeeIds : [DUMMY];
+      const projScope = scope.projectIds.length > 0 ? scope.projectIds : [DUMMY];
+      const tktScope = scope.ticketIds.length > 0 ? scope.ticketIds : [DUMMY];
+
+      conditions.push(`(
+        dte.employee_id = ANY($${idx++}::uuid[])
+        AND (
+          COALESCE(dte.project_id, tm.project_id) = ANY($${idx++}::uuid[])
+          OR dte.ticket_id = ANY($${idx++}::uuid[])
+          OR dte.manager_id = $${idx++}
+          OR e.module_manager_id = $${idx++}
+          OR dte.employee_id = $${idx++}
+        )
+      )`);
+      params.push(empScope, projScope, tktScope, callerId, callerId, callerId);
     }
 
     if (ticketIds) {
@@ -5082,8 +5220,8 @@ export const exportTimesheetReport = async (req, res) => {
          dte.description,
          dte.ticket_number,
          mgr.first_name || ' ' || mgr.last_name      AS manager_name,
-         -- dte.submitted_at,
-         COALESCE(apr.first_name || ' ' || apr.last_name, '') AS approved_by_name,
+         dte.submitted_at,
+         ''                                          AS approved_by_name,
          dte.approved_at,
          dte.rejection_reason
        FROM daily_timesheet_entries dte
@@ -5249,16 +5387,10 @@ export const exportTimesheetReport = async (req, res) => {
       // tickets in the manager's projects (even if they have 0 hours logged)
       if (isManager) {
         const scopeIds =
-          managerProjectIds.length > 0
-            ? managerProjectIds
+          managerEmployeeIds.length > 0
+            ? managerEmployeeIds
             : ["00000000-0000-0000-0000-000000000000"];
-        ebEmpWhere.push(`e.employee_id IN (
-          SELECT DISTINCT ta.employee_id
-          FROM   ticket_assignments ta
-          JOIN   ticket_master      tm2 ON tm2.ticket_id = ta.ticket_id
-          WHERE  tm2.project_id = ANY($${ebIdx++}::uuid[])
-            AND  ta.employee_id IS NOT NULL
-        )`);
+        ebEmpWhere.push(`e.employee_id = ANY($${ebIdx++}::uuid[])`);
         ebParams.push(scopeIds);
       }
 

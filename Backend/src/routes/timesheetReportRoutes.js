@@ -97,7 +97,7 @@ router.get(
  */
 router.get(
   "/project-summary",
-  authorizeRoles(["ADMIN"]),
+  authorizeRoles(["ADMIN", "MANAGER"]),
   getProjectSummaryReport,
 );
 
